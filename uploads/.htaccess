@@ -1,0 +1,16 @@
+# Protección del directorio de uploads
+# No permitir la ejecución de PHP en este directorio
+
+<Files ~ "\.php$">
+    Deny from all
+</Files>
+
+# Permitir solo ciertos tipos de archivos
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf)$">
+    Allow from all
+</FilesMatch>
+
+# Headers de seguridad para imágenes
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

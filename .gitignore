@@ -1,0 +1,34 @@
+# Ibron Inmobiliaria - Git Ignore
+
+# Configuración sensible
+config/supabase.php
+
+# Archivos de log
+*.log
+logs/
+
+# Uploads (pueden ser muchos archivos)
+uploads/*
+!uploads/.htaccess
+!uploads/README.md
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Cache
+cache/
+tmp/

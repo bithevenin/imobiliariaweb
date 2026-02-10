@@ -9,27 +9,27 @@
 :root {
     /* Colores de la marca */
     --color-black: #000000;
-    --color-gold: #D4A745;
-    --color-gold-light: #E5C468;
-    --color-gold-dark: #B8923A;
-    --color-white: #FFFFFF;
+    --color-gold: #d4a745;
+    --color-gold-light: #e5c468;
+    --color-gold-dark: #b8923a;
+    --color-white: #ffffff;
     --color-gray-dark: #1a1a1a;
     --color-gray-medium: #333333;
     --color-gray-light: #f8f9fa;
     --color-gray-border: #dee2e6;
-    
+
     /* Colores de estado */
     --color-success: #28a745;
     --color-warning: #ffc107;
     --color-danger: #dc3545;
     --color-info: #17a2b8;
-    
+
     /* Tipografía */
-    --font-heading: 'Montserrat', sans-serif;
-    --font-body: 'Open Sans', sans-serif;
+    --font-heading: "Montserrat", sans-serif;
+    --font-body: "Open Sans", sans-serif;
     --font-size-base: 16px;
     --line-height-base: 1.6;
-    
+
     /* Espaciado */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
@@ -37,18 +37,18 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     --spacing-xxl: 4rem;
-    
+
     /* Sombras */
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
-    --shadow-lg: 0 8px 16px rgba(0,0,0,0.2);
-    --shadow-xl: 0 12px 24px rgba(0,0,0,0.25);
-    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.25);
+
     /* Transiciones */
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
-    
+
     /* Border radius */
     --radius-sm: 4px;
     --radius-md: 8px;
@@ -89,12 +89,24 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--color-black);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.5rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1rem; }
+h1 {
+    font-size: 2.5rem;
+}
+h2 {
+    font-size: 2rem;
+}
+h3 {
+    font-size: 1.75rem;
+}
+h4 {
+    font-size: 1.5rem;
+}
+h5 {
+    font-size: 1.25rem;
+}
+h6 {
+    font-size: 1rem;
+}
 
 p {
     margin-bottom: var(--spacing-sm);
@@ -113,21 +125,39 @@ a:hover {
 /* ============================================
    UTILIDADES
    ============================================ */
-.text-gold { color: var(--color-gold) !important; }
-.text-black { color: var(--color-black) !important; }
-.text-white { color: var(--color-white) !important; }
+.text-gold {
+    color: var(--color-gold) !important;
+}
+.text-black {
+    color: var(--color-black) !important;
+}
+.text-white {
+    color: var(--color-white) !important;
+}
 
-.bg-black { background-color: var(--color-black) !important; }
-.bg-gold { background-color: var(--color-gold) !important; }
-.bg-dark { background-color: var(--color-gray-dark) !important; }
+.bg-black {
+    background-color: var(--color-black) !important;
+}
+.bg-gold {
+    background-color: var(--color-gold) !important;
+}
+.bg-dark {
+    background-color: var(--color-gray-dark) !important;
+}
 
 .section-padding {
     padding: var(--spacing-xxl) 0;
 }
 
-.text-center { text-align: center; }
-.text-uppercase { text-transform: uppercase; }
-.font-weight-bold { font-weight: 700; }
+.text-center {
+    text-align: center;
+}
+.text-uppercase {
+    text-transform: uppercase;
+}
+.font-weight-bold {
+    font-weight: 700;
+}
 
 /* ============================================
    BOTONES
@@ -226,7 +256,7 @@ a:hover {
 }
 
 .navbar-nav .nav-link::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 50%;
@@ -256,18 +286,22 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-black) 0%, var(--color-gray-dark) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--color-black) 0%,
+        var(--color-gray-dark) 100%
+    );
     overflow: hidden;
 }
 
 .hero::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('../images/hero-pattern.png') repeat;
+    background: url("../images/hero-pattern.png") repeat;
     opacity: 0.05;
 }
 
@@ -321,11 +355,15 @@ a:hover {
 }
 
 .section-title h2::after {
-    content: '';
+    content: "";
     display: block;
     width: 80px;
     height: 4px;
-    background: linear-gradient(90deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+    background: linear-gradient(
+        90deg,
+        var(--color-gold) 0%,
+        var(--color-gold-light) 100%
+    );
     margin: var(--spacing-sm) auto 0;
     border-radius: var(--radius-sm);
 }
@@ -520,6 +558,32 @@ a:hover {
     color: var(--color-gray-light);
 }
 
+/* Visitor Counter */
+.visitor-counter {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(212, 167, 69, 0.1);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(212, 167, 69, 0.3);
+    font-size: 0.9rem;
+    color: var(--color-gray-light);
+}
+
+.visitor-counter i {
+    color: var(--color-gold);
+}
+
+.visitor-counter .total-visits {
+    font-weight: 700;
+    color: var(--color-gold);
+}
+
+.visitor-counter .today-visits {
+    font-size: 0.85rem;
+    color: var(--color-gray-light);
+}
+
 /* ============================================
    BOTONES FLOTANTES DE REDES SOCIALES
    ============================================ */
@@ -553,15 +617,15 @@ a:hover {
 }
 
 .social-btn.whatsapp {
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
 }
 
 .social-btn.instagram {
-    background: linear-gradient(135deg, #E1306C 0%, #C13584 50%, #833AB4 100%);
+    background: linear-gradient(135deg, #e1306c 0%, #c13584 50%, #833ab4 100%);
 }
 
 .social-btn.facebook {
-    background: linear-gradient(135deg, #1877F2 0%, #0C63D4 100%);
+    background: linear-gradient(135deg, #1877f2 0%, #0c63d4 100%);
 }
 
 /* ============================================
@@ -594,28 +658,34 @@ a:hover {
     :root {
         --font-size-base: 14px;
     }
-    
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.75rem; }
-    h3 { font-size: 1.5rem; }
-    
+
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.75rem;
+    }
+    h3 {
+        font-size: 1.5rem;
+    }
+
     .hero-title {
         font-size: 2.5rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.2rem;
     }
-    
+
     .section-padding {
         padding: var(--spacing-xl) 0;
     }
-    
+
     .social-float {
         right: 15px;
         bottom: 15px;
     }
-    
+
     .social-btn {
         width: 50px;
         height: 50px;
@@ -652,6 +722,10 @@ a:hover {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

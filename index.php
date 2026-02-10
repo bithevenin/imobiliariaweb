@@ -5,86 +5,24 @@
  */
 
 require_once __DIR__ . '/config/settings.php';
+require_once __DIR__ . '/config/supabase.php';
 
 // Configurar título de página
 $page_title = 'Inicio';
 
-// Por ahora usaremos datos estáticos (mock data)
-// Cuando conectemos a Supabase, reemplazaremos esto con datos reales
-$featured_properties = [
-    [
-        'id' => 1,
-        'title' => 'Casa de Lujo en Punta Cana',
-        'type' => 'Casa',
-        'price' => 18500000,
-        'bedrooms' => 5,
-        'bathrooms' => 4,
-        'area' => 450,
-        'location' => 'Punta Cana',
-        'image' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 2,
-        'title' => 'Apartamento Moderno en Naco',
-        'type' => 'Apartamento',
-        'price' => 7800000,
-        'bedrooms' => 3,
-        'bathrooms' => 2,
-        'area' => 165,
-        'location' => 'Santo Domingo',
-        'image' => 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 3,
-        'title' => 'Villa Exclusiva en Casa de Campo',
-        'type' => 'Villa',
-        'price' => 45000000,
-        'bedrooms' => 6,
-        'bathrooms' => 5,
-        'area' => 650,
-        'location' => 'La Romana',
-        'image' => 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 4,
-        'title' => 'Penthouse de Lujo en La Esperilla',
-        'type' => 'Penthouse',
-        'price' => 15600000,
-        'bedrooms' => 4,
-        'bathrooms' => 3,
-        'area' => 320,
-        'location' => 'Santo Domingo',
-        'image' => 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 5,
-        'title' => 'Local Comercial en San Isidro',
-        'type' => 'Local Comercial',
-        'price' => 8500000,
-        'bedrooms' => 0,
-        'bathrooms' => 2,
-        'area' => 250,
-        'location' => 'Santo Domingo Este',
-        'image' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 6,
-        'title' => 'Casa Residencial en Santiago',
-        'type' => 'Casa',
-        'price' => 9200000,
-        'bedrooms' => 4,
-        'bathrooms' => 3,
-        'area' => 280,
-        'location' => 'Santiago',
-        'image' => 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ]
-];
+// Obtener propiedades destacadas desde Supabase
+$featured_properties = supabase_get('properties', [
+    'featured' => 'eq.true',
+    'status' => 'eq.Disponible',
+    'order' => 'created_at.desc',
+    'limit' => '6'
+]);
+
+// Si falla la conexión, usar array vacío
+if ($featured_properties === false) {
+    $featured_properties = [];
+    log_error('Failed to fetch featured properties from Supabase');
+}
 
 // Incluir header
 include_once __DIR__ . '/includes/header.php';
@@ -178,7 +116,7 @@ include_once __DIR__ . '/includes/header.php';
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?php echo $index * 50; ?>">
                 <div class="property-card">
                     <div class="property-card-img">
-                        <img src="<?php echo get_property_image($property['image']); ?>" 
+                        <img src="<?php echo escape_output($property['image_main'] ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop'); ?>" 
                              alt="<?php echo escape_output($property['title']); ?>">
                         <?php if ($property['status'] === 'Disponible'): ?>
                         <span class="property-badge">Destacada</span>
@@ -373,23 +311,38 @@ include_once __DIR__ . '/includes/footer.php';
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
         
-        // Por ahora solo mostrar mensaje de éxito simulado
-        // Cuando conectemos a Supabase, haremos la petición real
-        setTimeout(function() {
-            messageDiv.className = 'alert alert-success';
-            messageDiv.textContent = '¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.';
+        // Enviar a API
+        fetch('<?php echo SITE_URL; ?>/api/contact.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = data.message;
+                document.getElementById('contactForm').reset();
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = data.message;
+            }
             messageDiv.style.display = 'block';
             
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
             
-            // Reset form
-            document.getElementById('contactForm').reset();
-            
             // Ocultar mensaje después de 5 segundos
             setTimeout(function() {
                 messageDiv.style.display = 'none';
             }, 5000);
-        }, 1000);
+        })
+        .catch(error => {
+            messageDiv.className = 'alert alert-danger';
+            messageDiv.textContent = 'Error de conexión. Por favor intenta de nuevo.';
+            messageDiv.style.display = 'block';
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
+        });
     });
 </script>

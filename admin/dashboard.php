@@ -5,20 +5,39 @@
  */
 
 require_once __DIR__ . '/../config/settings.php';
+require_once __DIR__ . '/../config/supabase.php';
 require_auth(); // Requerir autenticación
 
 $page_title = 'Dashboard';
 
-// Mock data - estadísticas
-// En producción vendrá de Supabase
-$stats = [
-    'total_properties' => 8,
-    'available_properties' => 7,
-    'sold_properties' => 1,
-    'reserved_properties' => 0,
-    'total_messages' => 1,
-    'unread_messages' => 1
-];
+// Obtener todas las propiedades desde Supabase
+$all_properties = supabase_get('properties', []);
+
+// Obtener todos los mensajes desde Supabase  
+$all_messages = supabase_get('contact_messages', []);
+
+// Calcular estadísticas
+if ($all_properties && $all_messages) {
+    $stats = [
+        'total_properties' => count($all_properties),
+        'available_properties' => count(array_filter($all_properties, fn($p) => $p['status'] === 'Disponible')),
+        'sold_properties' => count(array_filter($all_properties, fn($p) => $p['status'] === 'Vendida')),
+        'reserved_properties' => count(array_filter($all_properties, fn($p) => $p['status'] === 'Reservada')),
+        'total_messages' => count($all_messages),
+        'unread_messages' => count(array_filter($all_messages, fn($m) => $m['status'] === 'new'))
+    ];
+} else {
+    // Fallback si falla la conexión
+    $stats = [
+        'total_properties' => 0,
+        'available_properties' => 0,
+        'sold_properties' => 0,
+        'reserved_properties' => 0,
+        'total_messages' => 0,
+        'unread_messages' => 0
+    ];
+    log_error('Failed to fetch dashboard stats from Supabase');
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

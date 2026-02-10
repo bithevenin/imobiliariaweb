@@ -10,7 +10,7 @@
 
 define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
-define('SITE_URL', 'http://localhost/Inmobiliaria'); // Cambiar en producción
+define('SITE_URL', 'http://localhost/imobiliariaweb'); // Cambiar en producción
 
 // ============================================
 // INFORMACIÓN DE CONTACTO

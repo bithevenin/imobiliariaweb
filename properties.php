@@ -5,108 +5,8 @@
  */
 
 require_once __DIR__ . '/config/settings.php';
+require_once __DIR__ . '/config/supabase.php';
 $page_title = 'Propiedades';
-
-// Mock data - Todas las propiedades
-// En producción, esto vendrá de Supabase con filtros y paginación
-$all_properties = [
-    [
-        'id' => 1,
-        'title' => 'Casa de Lujo en Punta Cana',
-        'type' => 'Casa',
-        'price' => 18500000,
-        'bedrooms' => 5,
-        'bathrooms' => 4,
-        'area' => 450,
-        'location' => 'Punta Cana',
-        'image' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 2,
-        'title' => 'Apartamento Moderno en Naco',
-        'type' => 'Apartamento',
-        'price' => 7800000,
-        'bedrooms' => 3,
-        'bathrooms' => 2,
-        'area' => 165,
-        'location' => 'Santo Domingo',
-        'image' => 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 3,
-        'title' => 'Villa Exclusiva en Casa de Campo',
-        'type' => 'Villa',
-        'price' => 45000000,
-        'bedrooms' => 6,
-        'bathrooms' => 5,
-        'area' => 650,
-        'location' => 'La Romana',
-        'image' => 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 4,
-        'title' => 'Solar Residencial en Bávaro',
-        'type' => 'Solar',
-        'price' => 3200000,
-        'bedrooms' => 0,
-        'bathrooms' => 0,
-        'area' => 800,
-        'location' => 'Bávaro',
-        'image' => 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 5,
-        'title' => 'Penthouse de Lujo en La Esperilla',
-        'type' => 'Penthouse',
-        'price' => 15600000,
-        'bedrooms' => 4,
-        'bathrooms' => 3,
-        'area' => 320,
-        'location' => 'Santo Domingo',
-        'image' => 'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 6,
-        'title' => 'Apartamento en Bella Vista',
-        'type' => 'Apartamento',
-        'price' => 5200000,
-        'bedrooms' => 2,
-        'bathrooms' => 2,
-        'area' => 110,
-        'location' => 'Santo Domingo',
-        'image' => 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop',
-        'status' => 'Vendida'
-    ],
-    [
-        'id' => 7,
-        'title' => 'Local Comercial en San Isidro',
-        'type' => 'Local Comercial',
-        'price' => 8500000,
-        'bedrooms' => 0,
-        'bathrooms' => 2,
-        'area' => 250,
-        'location' => 'Santo Domingo Este',
-        'image' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-    [
-        'id' => 8,
-        'title' => 'Casa Residencial en Santiago',
-        'type' => 'Casa',
-        'price' => 9200000,
-        'bedrooms' => 4,
-        'bathrooms' => 3,
-        'area' => 280,
-        'location' => 'Santiago',
-        'image' => 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop',
-        'status' => 'Disponible'
-    ],
-];
 
 // Obtener parámetros de filtro de la URL
 $search = isset($_GET['search']) ? sanitize_input($_GET['search']) : '';
@@ -115,31 +15,45 @@ $min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : PHP_FLOAT_MAX;
 $status_filter = isset($_GET['status']) ? sanitize_input($_GET['status']) : '';
 
-// Filtrar propiedades
-$filtered_properties = array_filter($all_properties, function($property) use ($search, $type_filter, $min_price, $max_price, $status_filter) {
-    // Filtro de búsqueda por título o ubicación
-    if ($search && stripos($property['title'], $search) === false && stripos($property['location'], $search) === false) {
-        return false;
-    }
-    
-    // Filtro por tipo
-    if ($type_filter && $property['type'] !== $type_filter) {
-        return false;
-    }
-    
-    // Filtro por precio
-    if ($property['price'] < $min_price || $property['price'] > $max_price) {
-        return false;
-    }
-    
-    // Filtro por estado
-    if ($status_filter && $property['status'] !== $status_filter) {
-        return false;
-    }
-    
-    return true;
-});
+// Construir filtros para Supabase
+$filters = ['order' => 'created_at.desc'];
 
+if ($type_filter) {
+    $filters['type'] = 'eq.' . $type_filter;
+}
+
+if ($status_filter) {
+    $filters['status'] = 'eq.' . $status_filter;
+}
+
+// Filtros de precio
+if ($min_price > 0) {
+    $filters['price'] = 'gte.' . $min_price;
+}
+if ($max_price < PHP_FLOAT_MAX) {
+    $filters['price'] = isset($filters['price']) 
+        ? $filters['price'] . ',lte.' . $max_price
+        : 'lte.' . $max_price;
+}
+
+// Obtener todas las propiedades desde Supabase
+$all_properties = supabase_get('properties', $filters);
+
+// Si falla la conexión, usar array vacío
+if ($all_properties === false) {
+    $all_properties = [];
+    log_error('Failed to fetch properties from Supabase');
+}
+
+// Filtrar por búsqueda de texto (búsqueda simple en título y ubicación)
+if ($search && !empty($all_properties)) {
+    $all_properties = array_filter($all_properties, function($property) use ($search) {
+        return stripos($property['title'], $search) !== false || 
+               stripos($property['location'], $search) !== false;
+    });
+}
+
+$filtered_properties = $all_properties;
 $total_properties = count($filtered_properties);
 
 include_once __DIR__ . '/includes/header.php';
@@ -284,7 +198,7 @@ include_once __DIR__ . '/includes/header.php';
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?php echo $index * 50; ?>">
                     <div class="property-card">
                         <div class="property-card-img">
-                            <img src="<?php echo get_property_image($property['image']); ?>" 
+                            <img src="<?php echo escape_output($property['image_main'] ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop'); ?>" 
                                  alt="<?php echo escape_output($property['title']); ?>">
                             <?php if ($property['status'] === 'Vendida'): ?>
                             <span class="property-badge sold">Vendida</span>

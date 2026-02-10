@@ -91,12 +91,23 @@ if (!defined('SITE_NAME')) {
 
         <!-- Footer Bottom -->
         <div class="footer-bottom">
-            <p class="mb-0">
-                &copy;
-                <?php echo date('Y'); ?>
-                <?php echo SITE_NAME; ?>. Todos los derechos reservados.
-                | Diseñado con <i class="fas fa-heart text-gold"></i> para tu éxito
-            </p>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-0">
+                        &copy;
+                        <?php echo date('Y'); ?>
+                        <?php echo SITE_NAME; ?>. Todos los derechos reservados.
+                        | Diseñado con <i class="fas fa-heart text-gold"></i> para tu éxito
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                    <?php
+                    // Incluir contador de visitas
+                    require_once __DIR__ . '/visitor-counter.php';
+                    display_visitor_badge(true);
+                    ?>
+                </div>
+            </div>
         </div>
     </div>
 </footer>

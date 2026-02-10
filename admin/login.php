@@ -23,24 +23,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = sanitize_input($_POST['username']);
         $password = $_POST['password']; // No sanitizar password
 
-        // Por ahora, hardcoded admin credentials
-        // En producción, esto vendrá de Supabase
-        if ($username === 'admin' && $password === '123') {
-            // Login exitoso
-            $_SESSION['user_id'] = 1;
-            $_SESSION['username'] = $username;
-            $_SESSION['role'] = 'admin';
-            $_SESSION['login_time'] = time();
+        // Buscar usuario en Supabase
+        $users = supabase_get('users', ['username' => 'eq.' . $username]);
+        
+        if ($users && count($users) > 0) {
+            $user = $users[0];
+            
+            // Verificar contraseña
+            if (password_verify($password, $user['password_hash'])) {
+                // Login exitoso
+                $_SESSION['user_id'] = $user['id']; // ← Ahora usa el UUID real de Supabase
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['login_time'] = time();
 
-            // Regenerar session ID por seguridad
-            session_regenerate_id(true);
+                // Regenerar session ID por seguridad
+                session_regenerate_id(true);
 
-            // Redirigir al dashboard
-            header('Location: ' . SITE_URL . '/admin/dashboard.php');
-            exit();
+                // Redirigir al dashboard
+                header('Location: ' . SITE_URL . '/admin/dashboard.php');
+                exit();
+            } else {
+                $error = 'Usuario o contraseña incorrectos';
+                log_error('Login fallido - contraseña incorrecta para: ' . $username);
+            }
         } else {
             $error = 'Usuario o contraseña incorrectos';
-            log_error('Login fallido para usuario: ' . $username);
+            log_error('Login fallido - usuario no encontrado: ' . $username);
         }
     }
 }

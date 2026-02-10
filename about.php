@@ -33,23 +33,22 @@ include_once __DIR__ . '/includes/header.php';
                     <?php echo SITE_NAME; ?>
                 </h2>
                 <p class="lead text-gold mb-3">
-                    Una trayectoria de éxito construyendo sueños
+                    Norvi Rosario – Presidente de IBRON Inmobiliaria SRL
                 </p>
                 <p class="mb-3">
-                    Fundada con el propósito de transformar el mercado inmobiliario dominicano,
-                    <?php echo SITE_NAME; ?> nació de la visión de ofrecer servicios de excelencia
-                    y propiedades de la más alta calidad a nuestros clientes.
+                    IBRON Inmobiliaria SRL es una empresa dedicada a la promoción, comercialización
+                    y venta de propiedades, comprometida con ofrecer un servicio confiable,
+                    transparente y orientado a satisfacer las necesidades de cada cliente.
                 </p>
                 <p class="mb-3">
-                    Desde nuestros inicios, nos hemos caracterizado por un compromiso inquebrantable
-                    con la satisfacción del cliente y la transparencia en cada transacción. Hemos
-                    ayudado a cientos de familias a encontrar el hogar de sus sueños y a inversionistas
-                    a realizar negocios exitosos.
+                    Bajo la dirección de su presidente, Norvi Rosario, la empresa trabaja con
+                    altos estándares de responsabilidad, asesorando a sus clientes en la compra,
+                    venta e inversión de bienes raíces, brindando acompañamiento personalizado en
+                    cada proceso para garantizar seguridad y confianza en cada negociación.
                 </p>
                 <p class="mb-4">
-                    Hoy en día, somos reconocidos como una de las inmobiliarias más confiables del país,
-                    con un portafolio diverso que incluye propiedades residenciales, comerciales y terrenos
-                    en las ubicaciones más privilegiadas de República Dominicana.
+                    Nuestro compromiso es hacer de cada inversión una historia de éxito, trabajando
+                    con dedicación para que nuestros clientes logren sus objetivos inmobiliarios.
                 </p>
 
                 <div class="d-flex gap-4 flex-wrap">
@@ -180,21 +179,20 @@ include_once __DIR__ . '/includes/header.php';
                         </div>
                         <div class="col-md-7 p-4 p-md-5">
                             <h3 class="mb-2">Norvi Rosario</h3>
-                            <p class="text-gold font-weight-bold mb-3">Asesor Inmobiliario</p>
+                            <p class="text-gold font-weight-bold mb-3">Presidente de IBRON Inmobiliaria SRL</p>
                             <p class="mb-3">
-                                Con más de 15 años de experiencia en el sector inmobiliario,
-                                Norvi Rosario lidera
-                                <?php echo SITE_NAME; ?> con una visión clara:
-                                ofrecer el mejor servicio y las mejores propiedades a nuestros clientes.
+                                Como presidente de <?php echo SITE_NAME; ?>, Norvi Rosario dirige la empresa
+                                con altos estándares de responsabilidad y profesionalismo, comprometido con
+                                ofrecer un servicio confiable y transparente a cada cliente.
                             </p>
                             <p class="mb-3">
-                                Su amplio conocimiento del mercado y su pasión por ayudar a las personas
-                                a encontrar la propiedad ideal lo han convertido en uno de los asesores
-                                más respetados del país.
+                                Su visión empresarial se centra en asesorar de manera personalizada a los clientes
+                                en la compra, venta e inversión de bienes raíces, garantizando seguridad y confianza
+                                en cada negociación.
                             </p>
                             <p class="mb-4">
-                                "Nuestro compromiso es hacer de cada inversión una historia de éxito.
-                                Trabajamos con dedicación para que nuestros clientes logren sus objetivos."
+                                "Trabajamos con dedicación para que nuestros clientes logren sus objetivos. Cada
+                                proceso es acompañado personalmente para garantizar el mejor resultado posible."
                             </p>
 
                             <div class="d-flex gap-3">

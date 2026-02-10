@@ -59,7 +59,7 @@ if ($all_properties && $all_messages) {
     <style>
         .sidebar {
             min-height: 100vh;
-            background: linear-gradient(180deg, var(--color-black) 0%, var(--color-gray-dark) 100%);
+            background: linear-gradient(180deg, #2a2a2a 0%, #3d3d3d 100%);
             padding: 0;
         }
 

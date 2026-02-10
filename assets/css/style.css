@@ -628,6 +628,10 @@ a:hover {
     background: linear-gradient(135deg, #1877f2 0%, #0c63d4 100%);
 }
 
+.social-btn.youtube {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+}
+
 /* ============================================
    FORMULARIOS
    ============================================ */

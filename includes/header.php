@@ -94,7 +94,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#contacto">
+                        <a class="nav-link <?php echo $current_page === 'contact' ? 'active' : ''; ?>"
+                            href="<?php echo SITE_URL; ?>/contact.php">
                             Contacto
                         </a>
                     </li>

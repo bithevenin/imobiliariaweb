@@ -28,12 +28,26 @@ if (!defined('SITE_NAME')) {
         aria-label="Facebook">
         <i class="fab fa-facebook-f"></i>
     </a>
+
+    <!-- YouTube -->
+    <a href="<?php echo YOUTUBE_URL; ?>" target="_blank" class="social-btn youtube" title="Suscríbete a YouTube"
+        aria-label="YouTube">
+        <i class="fab fa-youtube"></i>
+    </a>
 </div>
 
 <style>
-    /* Asegurar que los botones siempre estén visibles */
+    /* Animación inicial de entrada */
     .social-float {
         animation: slideInRight 0.6s ease-out;
+        transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* Estado oculto */
+    .social-float.hidden {
+        transform: translateX(100px);
+        opacity: 0;
+        pointer-events: none;
     }
 
     @keyframes slideInRight {
@@ -79,3 +93,56 @@ if (!defined('SITE_NAME')) {
         }
     }
 </style>
+
+<script>
+    (function () {
+        const socialFloat = document.querySelector('.social-float');
+        let hideTimeout;
+        let isHidden = false;
+
+        // Función para ocultar los botones
+        function hideButtons() {
+            if (socialFloat && !isHidden) {
+                socialFloat.classList.add('hidden');
+                isHidden = true;
+            }
+        }
+
+        // Función para mostrar los botones
+        function showButtons() {
+            if (socialFloat) {
+                socialFloat.classList.remove('hidden');
+                isHidden = false;
+
+                // Limpiar timeout anterior si existe
+                clearTimeout(hideTimeout);
+
+                // Ocultar después de 3.5 segundos
+                hideTimeout = setTimeout(hideButtons, 3500);
+            }
+        }
+
+        // Mostrar botones al cargar la página
+        window.addEventListener('load', function () {
+            // Ocultar después de 3.5 segundos
+            hideTimeout = setTimeout(hideButtons, 3500);
+        });
+
+        // Mostrar botones cuando el usuario hace clic en cualquier parte
+        document.addEventListener('click', function (e) {
+            // No reaccionar si se hace clic en los propios botones sociales
+            if (!e.target.closest('.social-float')) {
+                showButtons();
+            }
+        });
+
+        // También mostrar al hacer scroll (opcional, pero mejora la UX)
+        let scrollTimeout;
+        window.addEventListener('scroll', function () {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function () {
+                showButtons();
+            }, 100);
+        });
+    })();
+</script>

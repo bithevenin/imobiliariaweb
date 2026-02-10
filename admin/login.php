@@ -74,7 +74,7 @@ $page_title = 'Admin Login';
 
     <style>
         body {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #3d3d3d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -99,6 +99,10 @@ $page_title = 'Admin Login';
             padding: 40px 30px;
             text-align: center;
             color: white;
+        }
+
+        .login-header h4 {
+            color: white !important;
         }
 
         .login-header img {

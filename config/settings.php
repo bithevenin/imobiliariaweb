@@ -10,7 +10,16 @@
 
 define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
-define('SITE_URL', 'http://localhost/imobiliariaweb'); // Cambiar en producción
+
+// Auto-detectar SITE_URL basándose en la ubicación actual
+// Esto funciona tanto en localhost como en producción
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base_path = str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'])));
+if ($base_path === '/') {
+    $base_path = '';
+}
+define('SITE_URL', $protocol . '://' . $host . $base_path);
 
 // ============================================
 // INFORMACIÓN DE CONTACTO
@@ -27,8 +36,9 @@ define('CONTACT_ADDRESS', 'República Dominicana');
 
 define('WHATSAPP_NUMBER', '18293526103'); // Formato internacional para WhatsApp
 define('WHATSAPP_MESSAGE', 'Hola! Estoy interesado en sus propiedades');
-define('INSTAGRAM_URL', 'https://www.instagram.com/ibroninmobiliaria'); // Actualizar con el handle real
-define('FACEBOOK_URL', 'https://www.facebook.com/ibroninmobiliaria'); // Actualizar con la página real
+define('INSTAGRAM_URL', 'https://www.instagram.com/ibroninmobiliaria?igsh=b2htYnJva3h3d3Y5');
+define('FACEBOOK_URL', 'https://www.facebook.com/share/1AbPGHMKqY/');
+define('YOUTUBE_URL', 'https://www.youtube.com/@ibroninmobiliaria8120');
 
 // ============================================
 // CONFIGURACIÓN DE LA APLICACIÓN

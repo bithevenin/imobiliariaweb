@@ -62,6 +62,21 @@ function supabase_get($table, $filters = [], $select = '*') {
 }
 
 /**
+ * Convierte un array de PostgreSQL (formato de texto {}) a un array de PHP
+ */
+function pg_array_to_php_array($postgresArray) {
+    if (!$postgresArray || $postgresArray === '{}') return [];
+    if (is_array($postgresArray)) return $postgresArray;
+    
+    $clean = trim($postgresArray, '{}');
+    if (empty($clean)) return [];
+    
+    // Manejar elementos entre comillas o separados por comas
+    // Esta es una implementación simplificada para URLs de Supabase
+    return str_getcsv($clean);
+}
+
+/**
  * Hacer petición POST a Supabase (Insert)
  */
 function supabase_insert($table, $data) {
@@ -103,9 +118,14 @@ function supabase_insert($table, $data) {
 function supabase_update($table, $id, $data) {
     $url = SUPABASE_API_URL . '/' . $table . '?id=eq.' . $id;
     
+    // Usar SERVICE_KEY si está disponible para operaciones de escritura
+    $key = (defined('SUPABASE_SERVICE_KEY') && SUPABASE_SERVICE_KEY !== 'TU_SERVICE_ROLE_KEY_AQUI') 
+           ? SUPABASE_SERVICE_KEY 
+           : SUPABASE_ANON_KEY;
+    
     $headers = [
-        'apikey: ' . SUPABASE_ANON_KEY,
-        'Authorization: Bearer ' . SUPABASE_ANON_KEY,
+        'apikey: ' . $key,
+        'Authorization: Bearer ' . $key,
         'Content-Type: application/json',
         'Prefer: return=representation'
     ];
@@ -208,9 +228,14 @@ function supabase_auth_login($email, $password) {
 function test_supabase_connection() {
     $url = SUPABASE_URL . '/rest/v1/';
     
+    // Usar SERVICE_KEY si está disponible para borrado
+    $key = (defined('SUPABASE_SERVICE_KEY') && SUPABASE_SERVICE_KEY !== 'TU_SERVICE_ROLE_KEY_AQUI') 
+           ? SUPABASE_SERVICE_KEY 
+           : SUPABASE_ANON_KEY;
+    
     $headers = [
-        'apikey: ' . SUPABASE_ANON_KEY,
-        'Authorization: Bearer ' . SUPABASE_ANON_KEY
+        'apikey: ' . $key,
+        'Authorization: Bearer ' . $key
     ];
     
     $ch = curl_init($url);
@@ -287,9 +312,14 @@ function supabase_storage_upload($bucket, $file_path, $storage_path) {
 function supabase_storage_delete($bucket, $storage_path) {
     $url = SUPABASE_URL . '/storage/v1/object/' . $bucket . '/' . $storage_path;
     
+    // Usar SERVICE_KEY si está disponible, sino ANON_KEY
+    $key = (defined('SUPABASE_SERVICE_KEY') && SUPABASE_SERVICE_KEY !== 'TU_SERVICE_ROLE_KEY_AQUI') 
+           ? SUPABASE_SERVICE_KEY 
+           : SUPABASE_ANON_KEY;
+    
     $headers = [
-        'apikey: ' . SUPABASE_ANON_KEY,
-        'Authorization: Bearer ' . SUPABASE_ANON_KEY
+        'apikey: ' . $key,
+        'Authorization: Bearer ' . $key
     ];
     
     $ch = curl_init($url);
@@ -376,24 +406,8 @@ function php_array_to_pg_array($array) {
         return '{}';
     }
     $escaped = array_map(function($item) {
-        return '"' . str_replace('"', '\"', $item) . '"';
+        $val = str_replace(['\\', '"'], ['\\\\', '\"'], $item);
+        return '"' . $val . '"';
     }, $array);
     return '{' . implode(',', $escaped) . '}';
-}
-
-/**
- * Convertir PostgreSQL array a array PHP
- * @param string $pg_array
- * @return array
- */
-function pg_array_to_php_array($pg_array) {
-    if (empty($pg_array) || $pg_array === '{}') {
-        return [];
-    }
-    // Remover llaves y comillas
-    $pg_array = trim($pg_array, '{}');
-    $items = explode(',', $pg_array);
-    return array_map(function($item) {
-        return trim($item, '"');
-    }, $items);
 }

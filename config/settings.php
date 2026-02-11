@@ -195,7 +195,8 @@ function format_area($area)
 function get_property_image($image_path)
 {
     if (empty($image_path)) {
-        return SITE_URL . '/assets/images/property-placeholder.jpg';
+        // Usar un servicio más confiable que via.placeholder.com
+        return 'https://placehold.co/600x400/333/gold?text=Ibron+Inmobiliaria';
     }
     return $image_path;
 }

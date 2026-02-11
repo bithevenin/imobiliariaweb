@@ -16,9 +16,15 @@ $error = '';
 
 // Procesar login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    log_error('POST request recibida en login.php', ['post' => $_POST]);
+    
     // Validar CSRF token
     if (!isset($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])) {
         $error = 'Token de seguridad inválido';
+        log_error('CSRF Validation FAILED', [
+            'sent_token' => $_POST['csrf_token'] ?? 'null',
+            'session_token' => $_SESSION['csrf_token'] ?? 'null'
+        ]);
     } else {
         $username = sanitize_input($_POST['username']);
         $password = $_POST['password']; // No sanitizar password
@@ -29,13 +35,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($users && count($users) > 0) {
             $user = $users[0];
             
+            // Log para depuración
+            log_error('Intento de login', [
+                'username' => $username,
+                'user_found' => true,
+                'role' => $user['role'],
+                'hash_in_db' => $user['password_hash']
+            ]);
+            
             // Verificar contraseña
             if (password_verify($password, $user['password_hash'])) {
                 // Login exitoso
-                $_SESSION['user_id'] = $user['id']; // ← Ahora usa el UUID real de Supabase
+                log_error('Login exitoso para: ' . $username);
+                
+                $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['login_time'] = time();
+
+                // 1. Guardar sesión en Supabase (user_sessions)
+                $token = bin2hex(random_bytes(32));
+                $session_data = [
+                    'user_id' => $user['id'],
+                    'session_token' => $token,
+                    'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                    'expires_at' => date('Y-m-d H:i:s', strtotime('+24 hours'))
+                ];
+                supabase_insert('user_sessions', $session_data);
+
+                // 2. Actualizar último login
+                supabase_update('users', $user['id'], ['last_login' => date('Y-m-d H:i:s')]);
 
                 // Regenerar session ID por seguridad
                 session_regenerate_id(true);
@@ -45,11 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             } else {
                 $error = 'Usuario o contraseña incorrectos';
-                log_error('Login fallido - contraseña incorrecta para: ' . $username);
+                log_error('Login fallido - contraseña NO coincide', [
+                    'username' => $username,
+                    'hash_attempted' => password_hash($password, PASSWORD_DEFAULT) // Solo por referencia
+                ]);
             }
         } else {
             $error = 'Usuario o contraseña incorrectos';
-            log_error('Login fallido - usuario no encontrado: ' . $username);
+            log_error('Login fallido - usuario NO encontrado en Supabase', [
+                'username' => $username,
+                'supabase_response' => $users
+            ]);
         }
     }
 }

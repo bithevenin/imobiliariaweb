@@ -28,12 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido';
     } else {
-        // Recoger datos del formulario
+        // Limpiar precio de formato (RD$ 1,000.00 -> 1000.00)
+        $clean_price = preg_replace('/[^\d.]/', '', $_POST['price']);
         $data = [
             'title' => sanitize_input($_POST['title']),
             'description' => sanitize_input($_POST['description']),
             'type' => sanitize_input($_POST['type']),
-            'price' => (float)$_POST['price'],
+            'price' => (float)$clean_price,
             'bedrooms' => (int)$_POST['bedrooms'],
             'bathrooms' => (int)$_POST['bathrooms'],
             'area' => (float)$_POST['area'],
@@ -58,9 +59,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Generar ID para la propiedad (si es nueva)
         $prop_id = $property_id ?? uniqid();
+
+        // ==========================================
+        // NUEVO: PROCESAR IMÁGENES RECORTADAS/COMPRIMIDAS (BASE64)
+        // ==========================================
+        
+        // 1. Imagen Principal Recortada
+        if (!empty($_POST['cropped_main'])) {
+            $base64_img = $_POST['cropped_main'];
+            $file_data = decode_base64_image($base64_img);
+            
+            if ($file_data) {
+                $temp_file = tempnam(sys_get_temp_dir(), 'prop_main_');
+                file_put_contents($temp_file, $file_data['data']);
+                
+                $file_array = [
+                    'name' => 'main_optimized.jpg',
+                    'type' => $file_data['type'],
+                    'tmp_name' => $temp_file,
+                    'error' => UPLOAD_ERR_OK,
+                    'size' => strlen($file_data['data'])
+                ];
+                
+                $upload_result = upload_property_image($file_array, $prop_id, 'main');
+                if ($upload_result) {
+                    $data['image_main'] = $upload_result;
+                }
+                unlink($temp_file);
+            }
+        }
+        
+        // 2. Galería Recortada (Múltiples)
+        if (!empty($_POST['cropped_gallery']) && is_array($_POST['cropped_gallery'])) {
+            $gallery_urls = !empty($property['image_gallery']) 
+                ? (is_array($property['image_gallery']) ? $property['image_gallery'] : pg_array_to_php_array($property['image_gallery'])) 
+                : [];
+
+            foreach ($_POST['cropped_gallery'] as $index => $base64_img) {
+                $file_data = decode_base64_image($base64_img);
+                if ($file_data) {
+                    $temp_file = tempnam(sys_get_temp_dir(), 'prop_gal_');
+                    file_put_contents($temp_file, $file_data['data']);
+                    
+                    $file_array = [
+                        'name' => 'gallery_optimized_' . $index . '.jpg',
+                        'type' => $file_data['type'],
+                        'tmp_name' => $temp_file,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => strlen($file_data['data'])
+                    ];
+                    
+                    $upload_result = upload_property_image($file_array, $prop_id, 'gallery');
+                    if ($upload_result) {
+                        $gallery_urls[] = $upload_result;
+                    }
+                    unlink($temp_file);
+                }
+            }
+            
+            if (!empty($gallery_urls)) {
+                $data['image_gallery'] = php_array_to_pg_array($gallery_urls);
+            }
+        }
+        // ==========================================
         
         // Subir imagen principal si se proporcionó
-        if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['image_main']) && $_FILES['image_main']['error'] === UPLOAD_ERR_OK && empty($_POST['cropped_main'])) {
             $upload_result = upload_property_image($_FILES['image_main'], $prop_id, 'main');
             if ($upload_result) {
                 $data['image_main'] = $upload_result;
@@ -71,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Subir imágenes de galería si se proporcionaron
         $gallery_urls = [];
-        if (isset($_FILES['image_gallery']) && !empty($_FILES['image_gallery']['name'][0])) {
+        if (isset($_FILES['image_gallery']) && !empty($_FILES['image_gallery']['name'][0]) && empty($_POST['cropped_gallery'])) {
             $files = $_FILES['image_gallery'];
             $file_count = count($files['name']);
             
@@ -98,6 +162,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $data['image_gallery'] = '{' . implode(',', array_map(fn($url) => '"' . $url . '"', $gallery_urls)) . '}';
             }
         }
+
+        // ==========================================
+        // NUEVO: PROCESAR ELIMINACIÓN DE IMÁGENES
+        // ==========================================
+        if (isset($_POST['removed_images']) && is_array($_POST['removed_images'])) {
+            foreach ($_POST['removed_images'] as $img_url) {
+                // 1. Extraer la ruta del bucket de la URL pública
+                // URL: https://.../storage/v1/object/public/property-images/main/prop_id/img.jpg
+                $path_parts = explode('/public/property-images/', $img_url);
+                if (count($path_parts) > 1) {
+                    $storage_path = $path_parts[1];
+                    
+                    // 2. Eliminar físicamente de Supabase Storage
+                    supabase_storage_delete('property-images', $storage_path);
+                    
+                    // 3. Quitar de la base de datos si es imagen principal
+                    if ($img_url === ($property['image_main'] ?? '')) {
+                        $data['image_main'] = null;
+                    }
+                    
+                    // 4. Quitar de la galería (si existe)
+                    if (!empty($property['image_gallery'])) {
+                        $current_gallery = is_array($property['image_gallery']) 
+                            ? $property['image_gallery'] 
+                            : pg_array_to_php_array($property['image_gallery']);
+                        
+                        $index = array_search($img_url, $current_gallery);
+                        if ($index !== false) {
+                            unset($current_gallery[$index]);
+                            $data['image_gallery'] = php_array_to_pg_array(array_values($current_gallery));
+                        }
+                    }
+                }
+            }
+        }
+        // ==========================================
 
         if (empty($error)) {
             if ($property_id) {
@@ -131,6 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title><?php echo $page_title; ?> - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
     <style>
         .preview-container {
@@ -168,6 +270,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
         }
+        #map-selector {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        /* Estilos para el Cropper */
+        .cropper-container-wrapper {
+            max-height: 500px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+        #cropper-image {
+            max-width: 100%;
+            display: block;
+        }
+        .filter-controls {
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #dee2e6;
+        }
+        .filter-group {
+            margin-bottom: 10px;
+        }
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .image-size-badge {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+        }
+        .edit-existing-btn {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: rgba(0, 123, 255, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* FIX: Asegurar que los filtros se apliquen al cropper */
+        .cropper-view-box img, 
+        .cropper-canvas img {
+            filter: var(--cropper-filter, none);
+        }
+        /* FIX: Visibilidad cabecera modal */
+        #cropperModal .modal-header .modal-title {
+            color: #fff !important;
+        }
+        #cropperModal .modal-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
     </style>
 </head>
 <body>
@@ -200,14 +369,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="card">
                     <div class="card-body">
-                        <form method="POST" enctype="multipart/form-data">
+                        <form id="property-form" method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
                             <div class="row g-3">
                                 <!-- Título -->
                                 <div class="col-md-8">
                                     <label class="form-label">Título *</label>
-                                    <input type="text" class="form-control" name="title" 
+                                    <input type="text" class="form-control" name="title" id="title"
                                            value="<?php echo escape_output($property['title'] ?? ''); ?>" required>
                                 </div>
 
@@ -229,13 +398,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <!-- Descripción -->
                                 <div class="col-12">
                                     <label class="form-label">Descripción *</label>
-                                    <textarea class="form-control" name="description" rows="4" required><?php echo escape_output($property['description'] ?? ''); ?></textarea>
+                                    <textarea class="form-control" name="description" id="description" rows="4" required><?php echo escape_output($property['description'] ?? ''); ?></textarea>
                                 </div>
 
                                 <!-- Precio -->
                                 <div class="col-md-4">
                                     <label class="form-label">Precio (RD$) *</label>
-                                    <input type="number" class="form-control" name="price" step="0.01" 
+                                    <input type="text" class="form-control" name="price" id="price" autocomplete="off"
                                            value="<?php echo $property['price'] ?? ''; ?>" required>
                                 </div>
 
@@ -263,14 +432,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <!-- Ubicación -->
                                 <div class="col-md-6">
                                     <label class="form-label">Ubicación *</label>
-                                    <input type="text" class="form-control" name="location" 
-                                           value="<?php echo escape_output($property['location'] ?? ''); ?>" required>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="location" id="location"
+                                               value="<?php echo escape_output($property['location'] ?? ''); ?>" required>
+                                        <button class="btn btn-outline-primary" type="button" id="open-map-btn" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                            <i class="fas fa-map-marked-alt me-2"></i>Elegir en Mapa
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Ciudad, sector o coordenadas</small>
                                 </div>
 
                                 <!-- Dirección -->
                                 <div class="col-md-6">
                                     <label class="form-label">Dirección Completa</label>
-                                    <input type="text" class="form-control" name="address" 
+                                    <input type="text" class="form-control" name="address" id="address"
                                            value="<?php echo escape_output($property['address'] ?? ''); ?>">
                                 </div>
 
@@ -304,12 +479,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <input type="file" class="form-control" name="image_main" id="image_main" accept="image/jpeg,image/png,image/webp">
                                     <div id="main-preview" class="preview-container">
                                         <?php if (!empty($property['image_main'])): ?>
-                                            <div class="preview-item">
+                                            <div class="preview-item" id="main-img-container">
                                                 <img src="<?php echo escape_output($property['image_main']); ?>">
+                                                <button type="button" class="edit-existing-btn" title="Editar" onclick="editExistingImage('<?php echo $property['image_main']; ?>', 'main-img-container', 'main')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="remove-btn" onclick="removeExistingImage('<?php echo $property['image_main']; ?>', 'main-img-container')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                    <small class="text-muted">Esta imagen se mostrará como portada</small>
+                                    <small class="text-muted">Formatos: JPG, PNG, WEBP. Máx: 5MB.</small>
                                 </div>
 
                                 <!-- Galería de imágenes -->
@@ -322,32 +503,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             $gallery = is_array($property['image_gallery']) 
                                                 ? $property['image_gallery'] 
                                                 : pg_array_to_php_array($property['image_gallery']);
-                                            foreach ($gallery as $img_url): ?>
-                                                <div class="preview-item">
+                                            foreach ($gallery as $index => $img_url): 
+                                                $img_id = "gal-img-" . $index;
+                                            ?>
+                                                <div class="preview-item" id="<?php echo $img_id; ?>">
                                                     <img src="<?php echo escape_output($img_url); ?>">
+                                                    <button type="button" class="edit-existing-btn" title="Editar" onclick="editExistingImage('<?php echo $img_url; ?>', '<?php echo $img_id; ?>', 'gallery')">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="remove-btn" onclick="removeExistingImage('<?php echo $img_url; ?>', '<?php echo $img_id; ?>')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </div>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                     </div>
                                     <small class="text-muted d-block mt-1">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        Puedes seleccionar múltiples imágenes (Ctrl/Cmd + clic)
+                                        JPG, PNG, WEBP permitidos.
                                     </small>
                                 </div>
 
                                 <!-- Características -->
                                 <div class="col-md-6">
                                     <label class="form-label">Características (una por línea)</label>
-                                    <textarea class="form-control" name="features[]" rows="5" 
-                                              placeholder="Ej: Terraza amplia&#10;Jardín privado&#10;Garaje para 3 vehículos"></textarea>
+                                    <textarea class="form-control" name="features[]" id="features_input" rows="5" 
+                                              placeholder="Ej: Terraza amplia&#10;Jardín privado&#10;Garaje para 3 vehículos"><?php 
+                                              if (!empty($property['features'])) {
+                                                  $features = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+                                                  echo implode("\n", $features);
+                                              }
+                                              ?></textarea>
                                     <small class="text-muted">Escribe una característica por línea</small>
                                 </div>
 
                                 <!-- Amenidades -->
                                 <div class="col-md-6">
                                     <label class="form-label">Amenidades (una por línea)</label>
-                                    <textarea class="form-control" name="amenities[]" rows="5" 
-                                              placeholder="Ej: Piscina privada&#10;Área BBQ&#10;Aire acondicionado central"></textarea>
+                                    <textarea class="form-control" name="amenities[]" id="amenities_input" rows="5" 
+                                              placeholder="Ej: Piscina privada&#10;Área BBQ&#10;Aire acondicionado central"><?php 
+                                              if (!empty($property['amenities'])) {
+                                                  $amenities = is_array($property['amenities']) ? $property['amenities'] : pg_array_to_php_array($property['amenities']);
+                                                  echo implode("\n", $amenities);
+                                              }
+                                              ?></textarea>
                                     <small class="text-muted">Escribe una amenidad por línea</small>
                                 </div>
 
@@ -361,6 +560,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="btn btn-secondary btn-lg">
                                         <i class="fas fa-times me-2"></i>Cancelar
                                     </a>
+                                    <!-- Contenedor para imágenes eliminadas -->
+                                    <div id="deleted-images-container"></div>
                                 </div>
                             </div>
                         </form>
@@ -370,7 +571,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="mapModalLabel"><i class="fas fa-map-marker-alt me-2"></i>Seleccionar Ubicación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="map-selector"></div>
+                    <div class="p-3 bg-light border-top">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <p class="mb-0 small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> Arrastra el marcador rojo a la ubicación exacta de la propiedad.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="map-current-pos">
+                                    <i class="fas fa-crosshairs me-2"></i>Mi posición
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-location" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>Confirmar Ubicación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Recortar Imagen -->
+    <div class="modal fade" id="cropperModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="cropperModalLabel"><i class="fas fa-crop-alt me-2"></i>Edición Profesional de Imagen</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="cropper-container-wrapper">
+                        <img id="cropper-image" src="">
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <div class="row g-2">
+                            <div class="col-md-6 filter-group">
+                                <label>Brillo</label>
+                                <input type="range" class="form-range" id="brightness" min="0" max="200" value="100">
+                            </div>
+                            <div class="col-md-6 filter-group">
+                                <label>Contraste</label>
+                                <input type="range" class="form-range" id="contrast" min="0" max="200" value="100">
+                            </div>
+                            <div class="col-12 filter-group">
+                                <label>Filtros</label>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-dark filter-btn active" data-filter="none">Original</button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark filter-btn" data-filter="grayscale(100%)">B/N</button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark filter-btn" data-filter="sepia(100%)">Sepia</button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark filter-btn" data-filter="saturate(200%)">Vívido</button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark filter-btn" data-filter="hue-rotate(90deg)">Azulado</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-2 bg-dark text-white border-top d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.rotate(-90)" title="Rotar Izquierda">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.rotate(90)" title="Rotar Derecha">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.setAspectRatio(1.5)">3:2</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.setAspectRatio(1)">1:1</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.setAspectRatio(NaN)">Libre</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="cropper.reset()" title="Resetear">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <div class="me-auto small text-muted">
+                        <span id="current-img-size">Tamaño: Calculando...</span>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-crop">
+                        <i class="fas fa-save me-2"></i>Guardar y Optimizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="<?php echo SITE_URL; ?>/assets/js/admin-utils.js"></script>
     <script>
         function previewImages(input, containerId) {
             const container = document.getElementById(containerId);
@@ -403,6 +705,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Nota: Al subir el formulario se enviarán los archivos seleccionados
             previewImages(this, 'gallery-preview');
         });
+
+        function removeExistingImage(url, containerId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta imagen? Se borrará permanentemente.')) {
+                // Ocultar el elemento visualmente
+                document.getElementById(containerId).style.display = 'none';
+                
+                // Agregar a la lista de eliminados para el backend
+                const container = document.getElementById('deleted-images-container');
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'removed_images[]';
+                input.value = url;
+                container.appendChild(input);
+            }
+        }
     </script>
 </body>
 </html>

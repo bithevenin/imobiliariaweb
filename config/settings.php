@@ -331,3 +331,25 @@ $supabase_config = CONFIG_PATH . '/supabase.php';
 if (file_exists($supabase_config)) {
     require_once $supabase_config;
 }
+
+/**
+ * Descodificar una cadena base64 de una imagen
+ */
+function decode_base64_image($base64_string) {
+    if (empty($base64_string)) return false;
+    
+    $parts = explode(',', $base64_string);
+    if (count($parts) < 2) return false;
+    
+    $data = base64_decode($parts[1]);
+    $type = "";
+    
+    if (preg_match('/^data:image\/(\w+);base64/', $parts[0], $type_match)) {
+        $type = "image/" . $type_match[1];
+    }
+    
+    return [
+        'data' => $data,
+        'type' => $type
+    ];
+}

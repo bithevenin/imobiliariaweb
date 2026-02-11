@@ -163,6 +163,8 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
+            word-wrap: break-word; /* Asegura que el texto no se salga */
+            overflow-wrap: break-word;
         }
     </style>
 </head>

@@ -141,6 +141,8 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
 
     <style>
@@ -176,14 +178,14 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
 
     <div class="container-fluid p-0">
         <div class="mobile-header">
-            <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="height: 30px;">
+            <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="height: 30px; width: auto;">
             <button class="btn btn-dark" id="sidebarToggle"><i class="fas fa-bars"></i></button>
         </div>
 
         <div class="d-flex">
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header text-center">
-                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px;" class="mb-2">
+                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px; height: auto;" class="mb-2">
                     <p class="text-white-50 small mb-0">Admin Panel</p>
                 </div>
                 <div class="sidebar-menu">

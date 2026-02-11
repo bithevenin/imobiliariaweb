@@ -80,6 +80,8 @@ if ($all_messages !== false) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
 
     <style>
@@ -203,7 +205,7 @@ if ($all_messages !== false) {
     <div class="container-fluid p-0">
         <!-- Header Móvil -->
         <div class="mobile-header">
-            <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="height: 30px;">
+            <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="height: 30px; width: auto;">
             <button class="btn btn-dark" id="sidebarToggle">
                 <i class="fas fa-bars"></i>
             </button>
@@ -213,7 +215,7 @@ if ($all_messages !== false) {
             <!-- Sidebar -->
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header text-center">
-                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px;" class="mb-2">
+                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px; height: auto;" class="mb-2">
                     <p class="text-white-50 small mb-0">Admin Panel</p>
                 </div>
 
@@ -364,25 +366,28 @@ if ($all_messages !== false) {
                                     <i class="fas fa-bolt me-2"></i>Acciones Rápidas
                                 </h6>
                                 <div class="row g-2">
-                                    <div class="col-4">
+                                    <div class="col-6 col-xl-3">
                                         <a href="<?php echo SITE_URL; ?>/admin/property-form.php" class="btn btn-primary w-100 py-3 d-flex flex-column align-items-center border-0 shadow-sm">
                                             <i class="fas fa-plus-circle mb-2 fa-lg"></i>
-                                            <span class="small d-none d-sm-inline">Nueva Propiedad</span>
-                                            <span class="small d-sm-none">Nueva</span>
+                                            <span class="small fw-bold">Nueva Propiedad</span>
                                         </a>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-6 col-xl-3">
                                         <a href="<?php echo SITE_URL; ?>/admin/properties-manage.php" class="btn btn-dark w-100 py-3 d-flex flex-column align-items-center border-0 shadow-sm">
                                             <i class="fas fa-tasks mb-2 fa-lg"></i>
-                                            <span class="small d-none d-sm-inline">Gestionar</span>
-                                            <span class="small d-sm-none">Gestionar</span>
+                                            <span class="small fw-bold">Gestionar</span>
                                         </a>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-6 col-xl-3">
                                         <a href="<?php echo SITE_URL; ?>/admin/messages.php" class="btn btn-outline-dark w-100 py-3 d-flex flex-column align-items-center shadow-sm">
                                             <i class="fas fa-envelope mb-2 fa-lg"></i>
-                                            <span class="small d-none d-sm-inline">Mensajes</span>
-                                            <span class="small d-sm-none">Mensajes</span>
+                                            <span class="small fw-bold">Mensajes</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-6 col-xl-3">
+                                        <a href="<?php echo SITE_URL; ?>/index.php" target="_blank" class="btn btn-info text-white w-100 py-3 d-flex flex-column align-items-center border-0 shadow-sm">
+                                            <i class="fas fa-external-link-alt mb-2 fa-lg"></i>
+                                            <span class="small fw-bold">Sitio Web</span>
                                         </a>
                                     </div>
                                 </div>

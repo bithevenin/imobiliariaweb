@@ -38,6 +38,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -64,7 +65,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             <!-- Logo -->
             <a class="navbar-brand" href="<?php echo SITE_URL; ?>/index.php">
                 <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="<?php echo SITE_NAME; ?>"
-                    class="navbar-logo">
+                    class="navbar-logo" style="height: 40px; width: auto;">
             </a>
 
             <!-- Mobile Toggle -->

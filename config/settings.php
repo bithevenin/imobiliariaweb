@@ -15,10 +15,21 @@ define('SITE_TAGLINE', 'TU MEJOR INVERSION');
 // Esto funciona tanto en localhost como en producción
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$base_path = str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'])));
+
+// Obtener el path relativo del proyecto
+$script_file = str_replace('\\', '/', __FILE__);
+$doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+$project_root = str_replace('\\', '/', dirname(__DIR__));
+
+// Calcular base_path eliminando el DOCUMENT_ROOT del path del proyecto
+$base_path = str_replace($doc_root, '', $project_root);
+
+// Asegurar que empiece con / y no termine con /
+$base_path = '/' . trim($base_path, '/');
 if ($base_path === '/') {
     $base_path = '';
 }
+
 define('SITE_URL', $protocol . '://' . $host . $base_path);
 
 // ============================================

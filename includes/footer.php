@@ -16,7 +16,7 @@ if (!defined('SITE_NAME')) {
             <!-- Columna 1: Logo y Descripción -->
             <div class="col-lg-4 col-md-6">
                 <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="<?php echo SITE_NAME; ?>"
-                    class="footer-logo">
+                    class="footer-logo" style="max-height: 80px; width: auto;">
                 <p class="mt-3">
                     <?php echo SITE_NAME; ?> es tu mejor opción en bienes raíces.
                     Ofrecemos propiedades de lujo y excelentes oportunidades de inversión

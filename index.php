@@ -487,7 +487,8 @@ include_once __DIR__ . '/includes/header.php';
 </script>
 
 <?php
-// Incluir footer y botones sociales
+// Incluir Bot Animado, botones sociales y footer
+include_once __DIR__ . '/includes/bot-avatar.php';
 include_once __DIR__ . '/includes/social-buttons.php';
 include_once __DIR__ . '/includes/footer.php';
 ?>

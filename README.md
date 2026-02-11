@@ -2,26 +2,44 @@
 
 ## 📋 Descripción del Proyecto
 
-Sitio web profesional para **Ibron Inmobiliaria, S.R.L.** desarrollado con PHP, HTML5, Bootstrap 5 y Supabase como base de datos. El sistema incluye un panel administrativo completo para gestionar propiedades sin necesidad de programadores.
+## correo
+
+correo: [ibroninmoviliaria@outlook.com] contraseña: [q34hu79k.] contraseña
+supabase: [Q34hu79k.10]
+
+Sitio web profesional para **Ibron Inmobiliaria, S.R.L.** desarrollado con PHP,
+HTML5, Bootstrap 5 y Supabase como base de datos. El sistema incluye un panel
+administrativo completo para gestionar propiedades sin necesidad de
+programadores.
+
+recetear contraseña http://localhost/imobiliariaweb/admin/fix_it_now.php
 
 ## 🎨 Características Principales
 
 ### Frontend (Sitio Público)
-- ✅ **Página de Inicio**: Hero section, propiedades destacadas, servicios, estadísticas y formulario de contacto
-- ✅ **Página Acerca De**: Historia de la empresa, valores, perfil del director, misión y visión
-- ✅ **Catálogo de Propiedades**: Sistema de filtros avanzado (búsqueda, tipo, precio, estado)
+
+- ✅ **Página de Inicio**: Hero section, propiedades destacadas, servicios,
+  estadísticas y formulario de contacto
+- ✅ **Página Acerca De**: Historia de la empresa, valores, perfil del director,
+  misión y visión
+- ✅ **Catálogo de Propiedades**: Sistema de filtros avanzado (búsqueda, tipo,
+  precio, estado)
 - ✅ **Diseño Responsive**: Optimizado para móviles, tablets y desktop
 - ✅ **Botones Flotantes**: WhatsApp, Instagram, Facebook con enlaces directos
-- ✅ **Colores de la Marca**: Negro (#000000), Dorado (#D4A745), Blanco (#FFFFFF)
+- ✅ **Colores de la Marca**: Negro (#000000), Dorado (#D4A745), Blanco
+  (#FFFFFF)
 
 ### Backend (Panel Admin)
+
 - ✅ **Sistema de Autenticación**: Login seguro con protección CSRF
 - ✅ **Dashboard**: Estadísticas en tiempo real y accesos rápidos
-- ✅ **Gestión de Propiedades**: CRUD completo (Crear, Leer, Actualizar, Eliminar)
+- ✅ **Gestión de Propiedades**: CRUD completo (Crear, Leer, Actualizar,
+  Eliminar)
 - ✅ **Cambio de Estado**: Marcar propiedades como Disponible/Vendida/Reservada
 - ✅ **Gestión de Mensajes**: Ver consultas de clientes potenciales
 
 ### Seguridad
+
 - ✅ **CSRF Protection**: Tokens en todos los formularios
 - ✅ **XSS Prevention**: Sanitización de inputs
 - ✅ **SQL Injection**: Preparado para Supabase con Row Level Security (RLS)
@@ -42,7 +60,7 @@ Sitio web profesional para **Ibron Inmobiliaria, S.R.L.** desarrollado con PHP, 
    ```sql
    -- 1. Ejecutar database/supabase_schema.sql
    -- Crea las tablas: users, properties, contact_messages, user_sessions
-   
+
    -- 2. Ejecutar database/initial_data.sql
    -- Inserta usuario admin y propiedades de ejemplo
    ```
@@ -61,10 +79,12 @@ Sitio web profesional para **Ibron Inmobiliaria, S.R.L.** desarrollado con PHP, 
 ## 🔐 Credenciales de Admin
 
 ### Desarrollo (Cambiar en Producción)
+
 - **Usuario**: `admin`
 - **Contraseña**: `123`
 
 ### Acceso al Panel
+
 ```
 http://localhost/Inmobiliaria/admin/login.php
 ```
@@ -122,6 +142,7 @@ Inmobiliaria/
 ## 🚀 Instalación
 
 ### Requisitos
+
 - PHP 7.4 o superior
 - Servidor web (Apache/Nginx)
 - Cuenta de Supabase (gratuita)
@@ -133,7 +154,7 @@ Inmobiliaria/
    ```bash
    # Si usas Git
    git clone [URL_DEL_REPO]
-   
+
    # O simplemente copia la carpeta Inmobiliaria a tu servidor
    ```
 
@@ -185,6 +206,7 @@ El sitio incluye botones flotantes y enlaces a:
 ## 📊 Estado del Proyecto
 
 ### ✅ Completado (Modo de Desarrollo)
+
 - Frontend completo (3 páginas principales)
 - Panel de administración básico
 - Sistema de autenticación
@@ -194,6 +216,7 @@ El sitio incluye botones flotantes y enlaces a:
 - Documentación
 
 ### 🔄 Pendiente (Conectar a Supabase)
+
 - Integración real con Supabase API
 - CRUD de propiedades funcional
 - Formulario de contacto funcional
@@ -202,6 +225,7 @@ El sitio incluye botones flotantes y enlaces a:
 - Panel de estadísticas en tiempo real
 
 ### 🎯 Próximas Características (Futuro)
+
 - Página de detalle individual de propiedad
 - Galería de imágenes con lightbox
 - Integración con Google Maps
@@ -232,9 +256,10 @@ Para soporte o consultas sobre este proyecto:
 
 ## 📄 Licencia
 
-Este proyecto fue desarrollado para uso exclusivo de **Ibron Inmobiliaria, S.R.L.**
+Este proyecto fue desarrollado para uso exclusivo de **Ibron Inmobiliaria,
+S.R.L.**
 
 ---
 
-**Desarrollado con ❤️ para Ibron Inmobiliaria**  
-*Tu Mejor Inversión*
+**Desarrollado con ❤️ para Ibron Inmobiliaria**\
+_Tu Mejor Inversión_

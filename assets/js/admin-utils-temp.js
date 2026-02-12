@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Utilidades para el Panel Administrativo
  * Ibron Inmobiliaria
  */
@@ -11,7 +11,7 @@ let currentContrast = 100;
 let currentFilter = 'none';
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. CapitalizaciÃ³n automÃ¡tica
+    // 1. Capitalización automática
     const capitalizeFields = [
         'title',
         'description',
@@ -32,22 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // DEBUG: Interceptar submit del formulario para verificar inputs
-    const propertyForm = document.getElementById('property-form');
-    if (propertyForm) {
-        propertyForm.addEventListener('submit', function (e) {
-            const croppedMain = document.querySelectorAll('input[name="cropped_main"]');
-            const croppedGallery = document.querySelectorAll('input[name="cropped_gallery[]"]');
-
-            croppedMain.forEach((input, i) => {
-            });
-
-            if (croppedMain.length === 0) {
-            }
-        });
-    }
-
-    // 2. Formato de precio dinÃ¡mico ($1,000)
+    // 2. Formato de precio dinámico ($1,000)
     const priceInput = document.getElementById('price');
     if (priceInput) {
         const formatCurrency = (value) => {
@@ -95,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 3. IntegraciÃ³n Mapa Interactivo (Leaflet)
+    // 3. Integración Mapa Interactivo (Leaflet)
     let map, marker;
     let selectedLat = 18.4861;
     let selectedLng = -69.9312;
@@ -107,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!map) {
                 map = L.map('map-selector').setView([selectedLat, selectedLng], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: 'Â© OpenStreetMap contributors'
+                    attribution: '© OpenStreetMap contributors'
                 }).addTo(map);
                 marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
                 marker.on('dragend', function () {
@@ -175,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cropperModalEl = document.getElementById('cropperModal');
 
     if (!cropperModalEl) {
+        console.error('cropperModal element not found');
         return;
     }
 
@@ -183,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const saveCropBtn = document.getElementById('save-crop');
 
     if (!saveCropBtn) {
+        console.error('save-crop button not found');
         return;
     }
 
@@ -245,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const sizeText = formatFileSize(blob.size);
             const sizeElement = document.getElementById('current-img-size');
             if (sizeElement) {
-                sizeElement.textContent = `TamaÃ±o: ${sizeText}`;
+                sizeElement.textContent = `Tamaño: ${sizeText}`;
             }
         }, 'image/jpeg', 0.7);
     }
@@ -277,7 +264,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     saveCropBtn.addEventListener('click', function () {
+        console.log('Save crop button clicked');
         if (!cropper) {
+            console.error('Cropper not initialized');
             return;
         }
 
@@ -304,128 +293,12 @@ document.addEventListener('DOMContentLoaded', function () {
             reader.readAsDataURL(blob);
             reader.onloadend = function () {
                 const base64data = reader.result;
+                console.log('Base64 data generated, length:', base64data.length);
+                console.log('Calling processCroppedImage for target:', currentCropTarget);
                 processCroppedImage(base64data, blob);
             };
         }, 'image/jpeg', 0.7);
 
         cropperModal.hide();
     });
-
-    function processCroppedImage(base64, blob) {
-        const container = document.getElementById(currentCropTarget === 'main' ? 'main-preview' : 'gallery-preview');
-        const sizeStr = formatFileSize(blob.size);
-        const uniqueId = 'img-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-
-        // CRÃTICO: Primero eliminar inputs antiguos, ANTES de crear el nuevo
-        if (currentCropTarget === 'main') {
-            const oldMain = document.querySelectorAll('input[name="cropped_main"]');
-            oldMain.forEach(el => el.remove());
-            if (container) container.innerHTML = '';
-        }
-
-        // Crear input hidden
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = currentCropTarget === 'main' ? 'cropped_main' : 'cropped_gallery[]';
-        hiddenInput.value = base64;
-        hiddenInput.id = 'input-' + uniqueId;
-        const form = document.getElementById('property-form') || document.querySelector('form');
-        if (form) {
-            form.appendChild(hiddenInput);
-        } else {
-            alert('Error: No se puede guardar la imagen. Formulario no encontrado.');
-        }
-
-        // Preview con badge de tamaÃ±o
-        const previewItem = document.createElement('div');
-        previewItem.className = 'preview-item';
-        previewItem.id = 'preview-' + uniqueId;
-        previewItem.innerHTML = `
-            <img src="${base64}">
-            <span class="badge bg-success position-absolute top-0 end-0 m-1" style="font-size: 8px">Optimizado</span>
-            <span class="image-size-badge">${sizeStr}</span>
-            <button type="button" class="remove-btn" onclick="document.getElementById('preview-${uniqueId}').remove(); document.getElementById('input-${uniqueId}').remove();">
-                <i class="fas fa-trash"></i>
-            </button>
-        `;
-
-        // Si venÃ­amos de editar una imagen existente, marcarla para borrar
-        if (pendingDeletionUrl && pendingDeletionContainer) {
-            const delContainer = document.getElementById('deleted-images-container');
-            const delInput = document.createElement('input');
-            delInput.type = 'hidden';
-            delInput.name = 'removed_images[]';
-            delInput.value = pendingDeletionUrl;
-            delContainer.appendChild(delInput);
-
-            const oldEl = document.getElementById(pendingDeletionContainer);
-            if (oldEl) oldEl.remove();
-
-            // Limpiar variables pendientes
-            pendingDeletionUrl = null;
-            pendingDeletionContainer = null;
-        }
-
-        container.appendChild(previewItem);
-    }
-});
-
-let pendingDeletionUrl = null;
-let pendingDeletionContainer = null;
-
-/**
- * Cargar imagen existente para ediciÃ³n
- */
-function editExistingImage(url, containerId, target) {
-    const cropperModalEl = document.getElementById('cropperModal');
-    const cropperModal = new bootstrap.Modal(cropperModalEl);
-    const cropperImage = document.getElementById('cropper-image');
-
-    currentCropTarget = target;
-    pendingDeletionUrl = url;
-    pendingDeletionContainer = containerId;
-
-    cropperImage.src = ''; // Limpiar previo
-
-    fetch(url)
-        .then(res => res.blob())
-        .then(blob => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                cropperImage.src = e.target.result;
-                cropperModal.show();
-            };
-            reader.readAsDataURL(blob);
-        })
-        .catch(err => {
-            alert('Error al cargar la imagen para ediciÃ³n. Puede ser un problema de CORS.');
-        });
-}
-
-// Modificar saveCropBtn listener para ejecutar la eliminaciÃ³n pendiente
-// Buscamos el listener previo o lo sobreescribimos. En mi admin-utils.js ya estÃ¡ definido.
-// Lo actualizarÃ© en el bloque processCroppedImage para que use pendingDeletionUrl.
-
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function removeExistingImage(url, containerId) {
-    if (confirm('Â¿EstÃ¡s seguro de que quieres eliminar esta imagen? Se borrarÃ¡ permanentemente.')) {
-        document.getElementById(containerId).style.display = 'none';
-        const container = document.getElementById('deleted-images-container');
-        if (container) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'removed_images[]';
-            input.value = url;
-            container.appendChild(input);
-        }
-    }
-}
 

@@ -185,11 +185,12 @@ function logout_user()
 }
 
 /**
- * Formatear precio en pesos dominicanos
+ * Formatear precio con moneda (DOP por defecto o USD)
  */
-function format_price($price)
+function format_price($price, $currency = 'DOP')
 {
-    return 'RD$ ' . number_format($price, 2, '.', ',');
+    $prefix = ($currency === 'USD') ? 'US$ ' : 'RD$ ';
+    return $prefix . number_format($price, 0, '.', ',');
 }
 
 /**
@@ -347,19 +348,22 @@ if (file_exists($supabase_config)) {
 /**
  * Descodificar una cadena base64 de una imagen
  */
-function decode_base64_image($base64_string) {
-    if (empty($base64_string)) return false;
-    
+function decode_base64_image($base64_string)
+{
+    if (empty($base64_string))
+        return false;
+
     $parts = explode(',', $base64_string);
-    if (count($parts) < 2) return false;
-    
+    if (count($parts) < 2)
+        return false;
+
     $data = base64_decode($parts[1]);
     $type = "";
-    
+
     if (preg_match('/^data:image\/(\w+);base64/', $parts[0], $type_match)) {
         $type = "image/" . $type_match[1];
     }
-    
+
     return [
         'data' => $data,
         'type' => $type

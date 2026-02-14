@@ -14,18 +14,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Verificar CSRF token
-if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
-    exit;
+// Obtener datos del request (soportar tanto JSON como form-data)
+$input_data = [];
+$content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+
+if (strpos($content_type, 'application/json') !== false) {
+    $json_input = file_get_contents('php://input');
+    $input_data = json_decode($json_input, true) ?? [];
+} else {
+    $input_data = $_POST;
 }
 
 // Validar campos requeridos
-$name = sanitize_input($_POST['name'] ?? '');
-$email = sanitize_input($_POST['email'] ?? '');
-$phone = sanitize_input($_POST['phone'] ?? '');
-$message = sanitize_input($_POST['message'] ?? '');
+$name = sanitize_input($input_data['name'] ?? '');
+$email = sanitize_input($input_data['email'] ?? '');
+$phone = sanitize_input($input_data['phone'] ?? '');
+$subject = sanitize_input($input_data['subject'] ?? '');
+$message = sanitize_input($input_data['message'] ?? '');
+$property_id = sanitize_input($input_data['property_id'] ?? '');
+$property_title = sanitize_input($input_data['property_title'] ?? '');
 
 if (empty($name) || empty($email) || empty($message)) {
     http_response_code(400);
@@ -53,7 +60,7 @@ $recent_messages = supabase_get('contact_messages', [
 if ($recent_messages && count($recent_messages) >= 3) {
     http_response_code(429);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'Has enviado demasiados mensajes. Por favor intenta más tarde.'
     ]);
     exit;

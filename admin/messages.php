@@ -31,7 +31,9 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
     <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
@@ -88,7 +90,7 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
             display: none;
             background: white;
             padding: 10px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -98,18 +100,22 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
             .sidebar {
                 left: calc(-1 * var(--sidebar-width));
             }
+
             .sidebar.active {
                 left: 0;
             }
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
             }
+
             .mobile-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
+
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -117,9 +123,10 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 z-index: 998;
             }
+
             .sidebar-overlay.active {
                 display: block;
             }
@@ -163,7 +170,8 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
-            word-wrap: break-word; /* Asegura que el texto no se salga */
+            word-wrap: break-word;
+            /* Asegura que el texto no se salga */
             overflow-wrap: break-word;
         }
     </style>
@@ -187,7 +195,8 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
             <!-- Sidebar -->
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header text-center">
-                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px; height: auto;" class="mb-2">
+                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo"
+                        style="max-width: 120px; height: auto;" class="mb-2">
                     <p class="text-white-50 small mb-0">Admin Panel</p>
                 </div>
 
@@ -250,8 +259,10 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                             </div>
                             <div class="col-md-8">
                                 <div class="input-group input-group-sm">
-                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                    <input type="text" class="form-control border-start-0" id="searchMessage" placeholder="Buscar por nombre, email o mensaje...">
+                                    <span class="input-group-text bg-white border-end-0"><i
+                                            class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="searchMessage"
+                                        placeholder="Buscar por nombre, email o mensaje...">
                                 </div>
                             </div>
                         </div>
@@ -270,7 +281,8 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                         </div>
                     <?php else: ?>
                         <?php foreach ($messages as $message): ?>
-                            <div class="message-card <?php echo ($message['status'] ?? '') === 'new' ? 'unread' : ''; ?>" data-status="<?php echo $message['status'] ?? 'read'; ?>">
+                            <div class="message-card <?php echo ($message['status'] ?? '') === 'new' ? 'unread' : ''; ?>"
+                                data-status="<?php echo $message['status'] ?? 'read'; ?>">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <h5 class="mb-1 fw-bold h6">
@@ -282,14 +294,16 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                                         <div class="d-flex flex-wrap gap-3 mt-1">
                                             <span class="message-meta-item">
                                                 <i class="fas fa-envelope"></i>
-                                                <a href="mailto:<?php echo escape_output($message['email']); ?>" class="text-decoration-none text-muted">
+                                                <a href="mailto:<?php echo escape_output($message['email']); ?>"
+                                                    class="text-decoration-none text-muted">
                                                     <?php echo escape_output($message['email']); ?>
                                                 </a>
                                             </span>
                                             <?php if (!empty($message['phone'])): ?>
                                                 <span class="message-meta-item">
                                                     <i class="fas fa-phone"></i>
-                                                    <a href="tel:<?php echo escape_output($message['phone']); ?>" class="text-decoration-none text-muted">
+                                                    <a href="tel:<?php echo escape_output($message['phone']); ?>"
+                                                        class="text-decoration-none text-muted">
                                                         <?php echo escape_output($message['phone']); ?>
                                                     </a>
                                                 </span>
@@ -305,12 +319,22 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                            <li><a class="dropdown-item" href="mailto:<?php echo escape_output($message['email']); ?>"><i class="fas fa-reply me-2 text-primary"></i>Responder</a></li>
+                                            <li><a class="dropdown-item"
+                                                    href="https://mail.google.com/mail/?view=cm&fs=1&to=<?php echo urlencode($message['email']); ?>&su=<?php echo urlencode('Re: ' . $message['name'] . ' - Consulta Ibron Inmobiliaria'); ?>"
+                                                    target="_blank"><i class="fas fa-reply me-2 text-primary"></i>Responder</a>
+                                            </li>
                                             <?php if (!empty($message['phone'])): ?>
-                                                <li><a class="dropdown-item" href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $message['phone']); ?>" target="_blank"><i class="fab fa-whatsapp me-2 text-success"></i>WhatsApp</a></li>
+                                                <li><a class="dropdown-item"
+                                                        href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $message['phone']); ?>"
+                                                        target="_blank"><i
+                                                            class="fab fa-whatsapp me-2 text-success"></i>WhatsApp</a></li>
                                             <?php endif; ?>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><button class="dropdown-item text-danger" onclick="deleteMessage('<?php echo $message['id']; ?>')"><i class="fas fa-trash me-2"></i>Eliminar</button></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li><button class="dropdown-item text-danger"
+                                                    onclick="deleteMessage('<?php echo $message['id']; ?>')"><i
+                                                        class="fas fa-trash me-2"></i>Eliminar</button></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -320,11 +344,14 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                                 </div>
 
                                 <div class="d-flex gap-2">
-                                    <a href="mailto:<?php echo escape_output($message['email']); ?>" class="btn btn-sm btn-primary">
+                                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=<?php echo urlencode($message['email']); ?>&su=<?php echo urlencode('Re: ' . $message['name'] . ' - Consulta Ibron Inmobiliaria'); ?>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-primary">
                                         <i class="fas fa-reply me-1"></i>Responder
                                     </a>
                                     <?php if (($message['status'] ?? '') === 'new'): ?>
-                                        <button onclick="markAsRead('<?php echo $message['id']; ?>')" class="btn btn-sm btn-outline-dark">
+                                        <button onclick="markAsRead('<?php echo $message['id']; ?>')"
+                                            class="btn btn-sm btn-outline-dark">
                                             Marcar como leído
                                         </button>
                                     <?php endif; ?>

@@ -130,6 +130,78 @@ if (!defined('SITE_NAME')) {
     });
 </script>
 
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999"></div>
+
+<!-- Toast Notification Function -->
+<script>
+    function showToast(message, type = 'success') {
+        const toastContainer = document.querySelector('.toast-container');
+
+        // Determinar el icono y color según el tipo
+        let icon, bgClass, textClass;
+        switch (type) {
+            case 'success':
+                icon = 'fa-check-circle';
+                bgClass = 'bg-success';
+                textClass = 'text-white';
+                break;
+            case 'error':
+            case 'danger':
+                icon = 'fa-exclamation-circle';
+                bgClass = 'bg-danger';
+                textClass = 'text-white';
+                break;
+            case 'warning':
+                icon = 'fa-exclamation-triangle';
+                bgClass = 'bg-warning';
+                textClass = 'text-dark';
+                break;
+            case 'info':
+                icon = 'fa-info-circle';
+                bgClass = 'bg-info';
+                textClass = 'text-white';
+                break;
+            default:
+                icon = 'fa-bell';
+                bgClass = 'bg-primary';
+                textClass = 'text-white';
+        }
+
+        // Crear el toast
+        const toastId = 'toast-' + Date.now();
+        const toastHTML = `
+        <div id="${toastId}" class="toast align-items-center ${bgClass} ${textClass} border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="fas ${icon} me-2 fa-lg"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+
+        // Agregar al contenedor
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Inicializar y mostrar el toast
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            animation: true,
+            autohide: true,
+            delay: 5000
+        });
+
+        toast.show();
+
+        // Eliminar del DOM después de ocultarse
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+</script>
+
 </body>
 
 </html>

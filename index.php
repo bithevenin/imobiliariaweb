@@ -157,7 +157,15 @@ include_once __DIR__ . '/includes/header.php';
 
                             <div class="property-footer">
                                 <div class="property-price">
-                                    <?php echo format_price($property['price']); ?>
+                                    <?php
+                                    $curr = 'DOP';
+                                    if (!empty($property['features'])) {
+                                        $feats = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+                                        if (in_array('USD', $feats))
+                                            $curr = 'USD';
+                                    }
+                                    echo format_price($property['price'], $curr);
+                                    ?>
                                 </div>
                                 <a href="<?php echo SITE_URL; ?>/property-detail.php?id=<?php echo $property['id']; ?>"
                                     class="btn btn-sm btn-outline-gold">
@@ -523,27 +531,17 @@ include_once __DIR__ . '/includes/footer.php';
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = data.message;
+                    showToast(data.message || '¡Mensaje enviado exitosamente!', 'success');
                     document.getElementById('contactForm').reset();
                 } else {
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.textContent = data.message;
+                    showToast(data.message || 'Error al enviar el mensaje', 'error');
                 }
-                messageDiv.style.display = 'block';
 
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
-
-                // Ocultar mensaje después de 5 segundos
-                setTimeout(function () {
-                    messageDiv.style.display = 'none';
-                }, 5000);
             })
             .catch(error => {
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = 'Error de conexión. Por favor intenta de nuevo.';
-                messageDiv.style.display = 'block';
+                showToast('Error de conexión. Por favor intenta de nuevo.', 'error');
 
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';

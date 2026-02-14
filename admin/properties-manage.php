@@ -35,7 +35,9 @@ if ($all_messages) {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
     <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
@@ -92,7 +94,7 @@ if ($all_messages) {
             display: none;
             background: white;
             padding: 10px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -102,18 +104,22 @@ if ($all_messages) {
             .sidebar {
                 left: calc(-1 * var(--sidebar-width));
             }
+
             .sidebar.active {
                 left: 0;
             }
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
             }
+
             .mobile-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
+
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -121,9 +127,10 @@ if ($all_messages) {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 z-index: 998;
             }
+
             .sidebar-overlay.active {
                 display: block;
             }
@@ -176,7 +183,8 @@ if ($all_messages) {
             <!-- Sidebar -->
             <nav class="sidebar" id="sidebar">
                 <div class="sidebar-header text-center">
-                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="max-width: 120px; height: auto;" class="mb-2">
+                    <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo"
+                        style="max-width: 120px; height: auto;" class="mb-2">
                     <p class="text-white-50 small mb-0">Admin Panel</p>
                 </div>
 
@@ -244,8 +252,10 @@ if ($all_messages) {
                             </div>
                             <div class="col-md-6">
                                 <div class="input-group input-group-sm">
-                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                    <input type="text" class="form-control border-start-0" id="searchProperty" placeholder="Buscar por título o ubicación...">
+                                    <span class="input-group-text bg-white border-end-0"><i
+                                            class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="searchProperty"
+                                        placeholder="Buscar por título o ubicación...">
                                 </div>
                             </div>
                         </div>
@@ -271,28 +281,43 @@ if ($all_messages) {
                                         <td colspan="5" class="text-center py-5">
                                             <i class="fas fa-building fa-3x text-muted mb-3 d-block"></i>
                                             <p class="text-muted">No hay propiedades registradas</p>
-                                            <a href="<?php echo SITE_URL; ?>/admin/property-form.php" class="btn btn-primary btn-sm">
+                                            <a href="<?php echo SITE_URL; ?>/admin/property-form.php"
+                                                class="btn btn-primary btn-sm">
                                                 Agregar Primera Propiedad
                                             </a>
                                         </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($properties as $property): ?>
-                                        <tr data-type="<?php echo $property['type']; ?>" data-status="<?php echo $property['status']; ?>">
+                                        <tr data-type="<?php echo $property['type']; ?>"
+                                            data-status="<?php echo $property['status']; ?>">
                                             <td class="ps-4">
-                                                <img src="<?php echo get_property_image($property['image_main'] ?? ''); ?>" alt="" class="property-img-small shadow-sm">
+                                                <img src="<?php echo get_property_image($property['image_main'] ?? ''); ?>"
+                                                    alt="" class="property-img-small shadow-sm">
                                             </td>
                                             <td>
-                                                <div class="fw-bold text-dark"><?php echo escape_output($property['title']); ?></div>
+                                                <div class="fw-bold text-dark"><?php echo escape_output($property['title']); ?>
+                                                </div>
                                                 <div class="text-muted small">
-                                                    <i class="fas fa-map-marker-alt me-1"></i><?php echo escape_output($property['location']); ?>
+                                                    <i
+                                                        class="fas fa-map-marker-alt me-1"></i><?php echo escape_output($property['location']); ?>
                                                     <span class="mx-1">|</span>
-                                                    <span class="d-md-none fw-bold text-gold"><?php echo format_price($property['price']); ?></span>
-                                                    <span class="d-none d-md-inline"><?php echo escape_output($property['type']); ?></span>
+                                                    <?php
+                                                    $curr = 'DOP';
+                                                    if (!empty($property['features'])) {
+                                                        $feats = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+                                                        if (in_array('USD', $feats))
+                                                            $curr = 'USD';
+                                                    }
+                                                    ?>
+                                                    <span
+                                                        class="d-md-none fw-bold text-gold"><?php echo format_price($property['price'], $curr); ?></span>
+                                                    <span
+                                                        class="d-none d-md-inline"><?php echo escape_output($property['type']); ?></span>
                                                 </div>
                                             </td>
                                             <td class="d-none d-md-table-cell fw-bold text-gold">
-                                                <?php echo format_price($property['price']); ?>
+                                                <?php echo format_price($property['price'], $curr); ?>
                                             </td>
                                             <td>
                                                 <?php
@@ -309,10 +334,13 @@ if ($all_messages) {
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="<?php echo SITE_URL; ?>/admin/property-form.php?id=<?php echo $property['id']; ?>" class="btn btn-light border" title="Editar">
+                                                    <a href="<?php echo SITE_URL; ?>/admin/property-form.php?id=<?php echo $property['id']; ?>"
+                                                        class="btn btn-light border" title="Editar">
                                                         <i class="fas fa-edit text-primary"></i>
                                                     </a>
-                                                    <button onclick="deleteProperty('<?php echo $property['id']; ?>', '<?php echo addslashes(escape_output($property['title'])); ?>')" class="btn btn-light border" title="Eliminar">
+                                                    <button
+                                                        onclick="deleteProperty('<?php echo $property['id']; ?>', '<?php echo addslashes(escape_output($property['title'])); ?>')"
+                                                        class="btn btn-light border" title="Eliminar">
                                                         <i class="fas fa-trash text-danger"></i>
                                                     </button>
                                                 </div>
@@ -354,7 +382,7 @@ if ($all_messages) {
         // Función para eliminar propiedad
         function deleteProperty(id, title) {
             if (confirm(`¿Está seguro que desea eliminar la propiedad "${title}"?\n\nEsta acción borrará también todas sus imágenes y no se puede deshacer.`)) {
-                
+
                 const btn = event.currentTarget;
                 const originalHtml = btn.innerHTML;
                 btn.disabled = true;
@@ -365,31 +393,31 @@ if ($all_messages) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = btn.closest('tr');
-                        row.style.transition = 'all 0.3s ease';
-                        row.style.opacity = '0';
-                        row.style.transform = 'translateX(20px)';
-                        setTimeout(() => {
-                            row.remove();
-                            if (document.querySelectorAll('#propertyList tr').length === 0) {
-                                location.reload();
-                            }
-                        }, 300);
-                    } else {
-                        alert('Error: ' + (data.error || 'No se pudo eliminar la propiedad'));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = btn.closest('tr');
+                            row.style.transition = 'all 0.3s ease';
+                            row.style.opacity = '0';
+                            row.style.transform = 'translateX(20px)';
+                            setTimeout(() => {
+                                row.remove();
+                                if (document.querySelectorAll('#propertyList tr').length === 0) {
+                                    location.reload();
+                                }
+                            }, 300);
+                        } else {
+                            alert('Error: ' + (data.error || 'No se pudo eliminar la propiedad'));
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error de conexión al intentar eliminar');
                         btn.disabled = false;
                         btn.innerHTML = originalHtml;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error de conexión al intentar eliminar');
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                });
+                    });
             }
         }
 

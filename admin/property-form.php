@@ -20,6 +20,15 @@ if ($property_id) {
     if ($properties && count($properties) > 0) {
         $property = $properties[0];
         $page_title = 'Editar Propiedad';
+
+        // Extraer moneda de features si existe
+        $property['currency'] = 'DOP'; // Default
+        if (!empty($property['features'])) {
+            $features_arr = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+            if (in_array('USD', $features_arr)) {
+                $property['currency'] = 'USD';
+            }
+        }
     }
 }
 
@@ -46,10 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         // Procesar características (features)
-        if (!empty($_POST['features'])) {
-            $features = array_map('sanitize_input', $_POST['features']);
-            $data['features'] = '{' . implode(',', array_map(fn($f) => '"' . $f . '"', $features)) . '}';
-        }
+        $features = !empty($_POST['features']) ? array_map('sanitize_input', $_POST['features']) : [];
+        $selected_currency = sanitize_input($_POST['currency'] ?? 'DOP');
+
+        // Limpiar monedas previas de las características
+        $features = array_filter($features, fn($f) => !in_array($f, ['DOP', 'USD']));
+
+        // Agregar la moneda seleccionada a las características para persistencia
+        $features[] = $selected_currency;
+
+        $data['features'] = '{' . implode(',', array_map(fn($f) => '"' . $f . '"', $features)) . '}';
 
         // Procesar amenidades
         if (!empty($_POST['amenities'])) {
@@ -397,9 +412,18 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                 <div class="col-12"><label class="form-label small fw-bold">Descripción
                                         *</label><textarea class="form-control form-control-sm" name="description"
                                         rows="4" required><?php echo $property['description'] ?? ''; ?></textarea></div>
-                                <div class="col-6 col-md-3"><label class="form-label small fw-bold">Precio (RD$)
-                                        *</label><input type="text" class="form-control form-control-sm" name="price"
-                                        id="price" value="<?php echo $property['price'] ?? ''; ?>" required></div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small fw-bold">Moneda</label>
+                                    <select class="form-select form-select-sm" name="currency" id="currency">
+                                        <option value="DOP" <?php echo ($property['currency'] ?? 'DOP') === 'DOP' ? 'selected' : ''; ?>>DOP (RD$)</option>
+                                        <option value="USD" <?php echo ($property['currency'] ?? '') === 'USD' ? 'selected' : ''; ?>>USD (US$)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small fw-bold">Precio *</label>
+                                    <input type="text" class="form-control form-control-sm" name="price" id="price"
+                                        value="<?php echo $property['price'] ?? ''; ?>" required>
+                                </div>
                                 <div class="col-6 col-md-3"><label
                                         class="form-label small fw-bold">Habitaciones</label><input type="number"
                                         class="form-control form-control-sm" name="bedrooms"

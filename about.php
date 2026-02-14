@@ -173,7 +173,7 @@ include_once __DIR__ . '/includes/header.php';
                 <div class="bg-white rounded shadow-lg overflow-hidden" data-aos="fade-up">
                     <div class="row g-0 align-items-center">
                         <div class="col-md-5">
-                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&auto=format&fit=crop"
+                            <img src="<?php echo SITE_URL; ?>/assets/images/norvy.png"
                                 alt="Norvi Rosario - Director" class="img-fluid"
                                 style="height: 100%; object-fit: cover;">
                         </div>

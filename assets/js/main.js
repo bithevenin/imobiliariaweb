@@ -4,14 +4,14 @@
  */
 
 // Esperar a que el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+
     // ============================================
     // NAVBAR SCROLL EFFECT
     // ============================================
     const navbar = document.querySelector('.navbar');
     if (navbar) {
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
             } else {
@@ -19,22 +19,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // ============================================
     // SMOOTH SCROLL FOR ANCHOR LINKS
     // ============================================
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            
+
             // Ignorar si es solo "#" o enlaces de collapse/modal
             if (href === '#' || href.startsWith('#collapse') || href.startsWith('#modal')) {
                 return;
             }
-            
+
             e.preventDefault();
             const target = document.querySelector(href);
-            
+
             if (target) {
                 const offsetTop = target.offsetTop - 80; // Offset para navbar fijo
                 window.scrollTo({
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // ============================================
     // FORM VALIDATION
     // ============================================
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             form.classList.add('was-validated');
         }, false);
     });
-    
+
     // ============================================
     // CONTADOR ANIMADO PARA ESTADÍSTICAS
     // ============================================
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 16);
     }
-    
+
     // Activar contador cuando la sección es visible
     const stats = document.querySelectorAll('.stat-item h2');
     if (stats.length > 0 && 'IntersectionObserver' in window) {
@@ -90,10 +90,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }, { threshold: 0.5 });
-        
+
         stats.forEach(stat => observer.observe(stat));
     }
-    
+
     // ============================================
     // IMAGE LAZY LOADING FALLBACK
     // ============================================
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
         document.body.appendChild(script);
     }
-    
+
     // ============================================
     // TOOLTIP & POPOVER INITIALIZATION (Bootstrap)
     // ============================================
@@ -116,12 +116,12 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
+
     const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
-    
+
     // ============================================
     // AUTO-HIDE ALERTS
     // ============================================
@@ -133,14 +133,14 @@ document.addEventListener('DOMContentLoaded', function() {
             bsAlert.close();
         }, delay);
     });
-    
+
     // ============================================
     // PROPERTY SEARCH WITH DEBOUNCE
     // ============================================
     const searchInput = document.getElementById('search');
     if (searchInput) {
         let searchTimeout;
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 // Aquí iría la lógica de búsqueda AJAX cuando conectemos a Supabase
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500); // Esperar 500ms después de que el usuario deje de escribir
         });
     }
-    
+
     // ============================================
     // PRICE FORMATTER
     // ============================================
@@ -159,14 +159,14 @@ document.addEventListener('DOMContentLoaded', function() {
             input.value = 'RD$ ' + value;
         }
     }
-    
+
     const priceInputs = document.querySelectorAll('input[data-price]');
     priceInputs.forEach(input => {
-        input.addEventListener('blur', function() {
+        input.addEventListener('blur', function () {
             formatPrice(this);
         });
     });
-    
+
     // ============================================
     // PHONE NUMBER FORMATTER (Dominican format)
     // ============================================
@@ -178,24 +178,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         input.value = value;
     }
-    
+
     const phoneInputs = document.querySelectorAll('input[type="tel"]');
     phoneInputs.forEach(input => {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             formatPhoneNumber(this);
         });
     });
-    
+
     // ============================================
     // IMAGE PREVIEW FOR FILE UPLOADS
     // ============================================
     const imageInputs = document.querySelectorAll('input[type="file"][accept*="image"]');
     imageInputs.forEach(input => {
-        input.addEventListener('change', function(e) {
+        input.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const preview = document.getElementById(input.id + '_preview');
                     if (preview) {
                         preview.src = e.target.result;
@@ -206,26 +206,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // ============================================
     // CONFIRM DELETE MODAL
     // ============================================
     const deleteButtons = document.querySelectorAll('[data-confirm-delete]');
     deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
+        button.addEventListener('click', function (e) {
             const message = this.dataset.confirmDelete || '¿Estás seguro de que deseas eliminar este elemento?';
             if (!confirm(message)) {
                 e.preventDefault();
             }
         });
     });
-    
+
     // ============================================
     // COPY TO CLIPBOARD
     // ============================================
     const copyButtons = document.querySelectorAll('[data-copy]');
     copyButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const text = this.dataset.copy;
             navigator.clipboard.writeText(text).then(() => {
                 // Mostrar feedback visual
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    
+
 });
 
 // ============================================
@@ -254,7 +254,7 @@ function showToast(message, type = 'success') {
         container.style.zIndex = '9999';
         document.body.appendChild(container);
     }
-    
+
     const toastEl = document.createElement('div');
     toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
     toastEl.setAttribute('role', 'alert');
@@ -264,11 +264,11 @@ function showToast(message, type = 'success') {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
-    
+
     document.getElementById('toastContainer').appendChild(toastEl);
     const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
     toast.show();
-    
+
     toastEl.addEventListener('hidden.bs.toast', function () {
         toastEl.remove();
     });

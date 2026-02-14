@@ -249,7 +249,15 @@ include_once __DIR__ . '/includes/header.php';
 
                                 <div class="property-footer">
                                     <div class="property-price">
-                                        <?php echo format_price($property['price']); ?>
+                                        <?php
+                                        $curr = 'DOP';
+                                        if (!empty($property['features'])) {
+                                            $feats = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+                                            if (in_array('USD', $feats))
+                                                $curr = 'USD';
+                                        }
+                                        echo format_price($property['price'], $curr);
+                                        ?>
                                     </div>
                                     <?php if ($property['status'] === 'Disponible'): ?>
                                         <a href="<?php echo SITE_URL; ?>/property-detail.php?id=<?php echo $property['id']; ?>"

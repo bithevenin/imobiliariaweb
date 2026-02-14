@@ -51,17 +51,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const priceInput = document.getElementById('price');
     if (priceInput) {
         const formatCurrency = (value) => {
-            let cleanValue = value.replace(/[^\d.]/g, '');
-            const parts = cleanValue.split('.');
-            if (parts.length > 2) cleanValue = parts[0] + '.' + parts.slice(1).join('');
+            const cleanValue = value.replace(/[^\d]/g, '');
             if (!cleanValue) return '';
-            let integerPart = parts[0];
-            const decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+            let integerPart = cleanValue;
             if (integerPart) {
                 integerPart = parseInt(integerPart).toLocaleString('en-US');
             }
-            return 'RD$ ' + integerPart + decimalPart;
+
+            // Detectar moneda si existe el selector
+            const currencySelector = document.getElementById('currency');
+            const currencyPrefix = (currencySelector && currencySelector.value === 'USD') ? 'US$ ' : 'RD$ ';
+
+            return currencyPrefix + integerPart;
         };
+
+        // Escuchar cambios en el selector de moneda para actualizar el formato del precio
+        const currencySelector = document.getElementById('currency');
+        if (currencySelector) {
+            currencySelector.addEventListener('change', function () {
+                if (priceInput.value) {
+                    priceInput.value = formatCurrency(priceInput.value);
+                }
+            });
+        }
 
         priceInput.addEventListener('keydown', function (e) {
             if ([46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||

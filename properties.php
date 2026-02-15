@@ -11,9 +11,42 @@ $page_title = 'Propiedades';
 // Obtener parámetros de filtro de la URL
 $search = isset($_GET['search']) ? sanitize_input($_GET['search']) : '';
 $type_filter = isset($_GET['type']) ? sanitize_input($_GET['type']) : '';
-$min_price = isset($_GET['min_price']) ? (float) $_GET['min_price'] : 0;
-$max_price = isset($_GET['max_price']) ? (float) $_GET['max_price'] : PHP_FLOAT_MAX;
+$ciudad_filter = isset($_GET['ciudad']) ? sanitize_input($_GET['ciudad']) : '';
+$bedrooms_filter = isset($_GET['bedrooms']) ? (int) $_GET['bedrooms'] : 0;
+$bathrooms_filter = isset($_GET['bathrooms']) ? (int) $_GET['bathrooms'] : 0;
+$precio_range = isset($_GET['precio']) ? sanitize_input($_GET['precio']) : '';
+
+// Parámetros de precio manuales (compatibilidad)
+$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float) $_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float) $_GET['max_price'] : PHP_FLOAT_MAX;
 $status_filter = isset($_GET['status']) ? sanitize_input($_GET['status']) : '';
+$currency_filter = isset($_GET['currency']) ? sanitize_input($_GET['currency']) : 'DOP';
+
+// Procesar rango de precio de la portada (ej: usd-100k-500k)
+if ($precio_range) {
+    $parts = explode('-', $precio_range);
+    if (count($parts) >= 2) {
+        $currency_filter = strtoupper($parts[0]);
+        $min_str = $parts[1];
+        $max_str = $parts[2] ?? '';
+        
+        // Función para convertir k/m a números
+        $to_num = function($str) {
+            $str = strtolower($str);
+            $val = (float) $str;
+            if (strpos($str, 'k') !== false) $val *= 1000;
+            if (strpos($str, 'm') !== false) $val *= 1000000;
+            return $val;
+        };
+        
+        $min_price = $to_num($min_str);
+        if ($max_str && $max_str !== '+') {
+            $max_price = $to_num($max_str);
+        } else {
+            $max_price = PHP_FLOAT_MAX;
+        }
+    }
+}
 
 // Construir filtros para Supabase
 $filters = ['order' => 'created_at.desc'];
@@ -26,14 +59,8 @@ if ($status_filter) {
     $filters['status'] = 'eq.' . $status_filter;
 }
 
-// Filtros de precio
-if ($min_price > 0) {
-    $filters['price'] = 'gte.' . $min_price;
-}
-if ($max_price < PHP_FLOAT_MAX) {
-    $filters['price'] = isset($filters['price'])
-        ? $filters['price'] . ',lte.' . $max_price
-        : 'lte.' . $max_price;
+if ($ciudad_filter) {
+    $filters['ciudad'] = 'eq.' . $ciudad_filter;
 }
 
 // Obtener todas las propiedades desde Supabase
@@ -45,15 +72,50 @@ if ($all_properties === false) {
     log_error('Failed to fetch properties from Supabase');
 }
 
-// Filtrar por búsqueda de texto (búsqueda simple en título y ubicación)
-if ($search && !empty($all_properties)) {
-    $all_properties = array_filter($all_properties, function ($property) use ($search) {
-        return stripos($property['title'], $search) !== false ||
-            stripos($property['location'], $search) !== false;
-    });
-}
+// Filtrar en PHP (para búsquedas complejas o campos no indexados)
+$filtered_properties = array_filter($all_properties ?? [], function ($property) use ($search, $bedrooms_filter, $bathrooms_filter, $min_price, $max_price, $currency_filter) {
+    // 1. Búsqueda por texto (Título, Ubicación, Sector)
+    if ($search) {
+        $search_found = stripos($property['title'] ?? '', $search) !== false ||
+                        stripos($property['location'] ?? '', $search) !== false ||
+                        (isset($property['sector']) && stripos($property['sector'], $search) !== false);
+        if (!$search_found) return false;
+    }
+    
+    // 2. Filtro de Habitaciones (GTE)
+    if ($bedrooms_filter > 0 && (int)($property['bedrooms'] ?? 0) < $bedrooms_filter) {
+        return false;
+    }
+    
+    // 3. Filtro de Baños (GTE)
+    if ($bathrooms_filter > 0 && (int)($property['bathrooms'] ?? 0) < $bathrooms_filter) {
+        return false;
+    }
+    
+    // 4. Filtro de Moneda y Precio
+    $property_price = (float) ($property['price'] ?? 0);
+    $property_currency = 'DOP'; // Default
+    if (!empty($property['features'])) {
+        $features = is_array($property['features']) 
+            ? $property['features'] 
+            : pg_array_to_php_array($property['features']);
+        
+        if (in_array('USD', $features)) {
+            $property_currency = 'USD';
+        }
+    }
+    
+    if ($property_currency !== $currency_filter) {
+        return false;
+    }
+    
+    if ($property_price < $min_price || $property_price > $max_price) {
+        return false;
+    }
+    
+    return true;
+});
 
-$filtered_properties = $all_properties;
 $total_properties = count($filtered_properties);
 
 include_once __DIR__ . '/includes/header.php';
@@ -114,44 +176,28 @@ include_once __DIR__ . '/includes/header.php';
                         </select>
                     </div>
 
-                    <!-- Precio Mínimo -->
-                    <div class="col-lg-2 col-md-6">
-                        <label for="min_price" class="form-label">
-                            <i class="fas fa-dollar-sign text-gold me-2"></i>Precio Min
+                    <!-- Currency Selector -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label">
+                            <i class="fas fa-dollar-sign text-gold me-2"></i>Moneda
                         </label>
-                        <select class="form-select" id="min_price" name="min_price">
-                            <option value="0">Sin mínimo</option>
-                            <option value="1000000" <?php echo $min_price == 1000000 ? 'selected' : ''; ?>>RD$ 1M</option>
-                            <option value="3000000" <?php echo $min_price == 3000000 ? 'selected' : ''; ?>>RD$ 3M</option>
-                            <option value="5000000" <?php echo $min_price == 5000000 ? 'selected' : ''; ?>>RD$ 5M</option>
-                            <option value="10000000" <?php echo $min_price == 10000000 ? 'selected' : ''; ?>>RD$ 10M
-                            </option>
-                            <option value="20000000" <?php echo $min_price == 20000000 ? 'selected' : ''; ?>>RD$ 20M
-                            </option>
-                        </select>
+                        <div class="currency-toggle">
+                            <input type="radio" name="currency" id="currency-dop" value="DOP" 
+                                <?php echo (!isset($_GET['currency']) || $_GET['currency'] === 'DOP') ? 'checked' : ''; ?>>
+                            <label for="currency-dop" class="currency-option">
+                                <i class="fas fa-peso-sign"></i> DOP
+                            </label>
+                            
+                            <input type="radio" name="currency" id="currency-usd" value="USD"
+                                <?php echo (isset($_GET['currency']) && $_GET['currency'] === 'USD') ? 'checked' : ''; ?>>
+                            <label for="currency-usd" class="currency-option">
+                                <i class="fas fa-dollar-sign"></i> USD
+                            </label>
+                        </div>
                     </div>
 
-                    <!-- Precio Máximo -->
-                    <div class="col-lg-2 col-md-6">
-                        <label for="max_price" class="form-label">
-                            <i class="fas fa-dollar-sign text-gold me-2"></i>Precio Max
-                        </label>
-                        <select class="form-select" id="max_price" name="max_price">
-                            <option value="">Sin máximo</option>
-                            <option value="5000000" <?php echo $max_price == 5000000 ? 'selected' : ''; ?>>RD$ 5M</option>
-                            <option value="10000000" <?php echo $max_price == 10000000 ? 'selected' : ''; ?>>RD$ 10M
-                            </option>
-                            <option value="20000000" <?php echo $max_price == 20000000 ? 'selected' : ''; ?>>RD$ 20M
-                            </option>
-                            <option value="30000000" <?php echo $max_price == 30000000 ? 'selected' : ''; ?>>RD$ 30M
-                            </option>
-                            <option value="50000000" <?php echo $max_price == 50000000 ? 'selected' : ''; ?>>RD$ 50M
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Estado -->
-                    <div class="col-lg-2 col-md-6">
+                    <!-- Status -->
+                    <div class="col-lg-3 col-md-6">
                         <label for="status" class="form-label">
                             <i class="fas fa-tag text-gold me-2"></i>Estado
                         </label>
@@ -164,6 +210,34 @@ include_once __DIR__ . '/includes/header.php';
                             <option value="Reservada" <?php echo $status_filter === 'Reservada' ? 'selected' : ''; ?>>
                                 Reservada</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- Price Range Slider Row -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <label class="form-label">
+                            <i class="fas fa-chart-line text-gold me-2"></i>Rango de Precio
+                        </label>
+                        
+                        <!-- Price Display -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="price-display">
+                                <small class="text-muted">Mínimo</small>
+                                <div class="fw-bold" id="price-min-display">$0</div>
+                            </div>
+                            <div class="price-display text-end">
+                                <small class="text-muted">Máximo</small>
+                                <div class="fw-bold" id="price-max-display">$22M</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Range Slider -->
+                        <div id="price-range-slider" class="mb-3"></div>
+                        
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" name="min_price" id="min_price" value="<?php echo $min_price; ?>">
+                        <input type="hidden" name="max_price" id="max_price" value="<?php echo $max_price > 0 && $max_price < PHP_FLOAT_MAX ? $max_price : ''; ?>">
                     </div>
                 </div>
 
@@ -297,6 +371,9 @@ include_once __DIR__ . '/includes/social-buttons.php';
 include_once __DIR__ . '/includes/footer.php';
 ?>
 
+<!-- noUiSlider CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+
 <!-- AOS Animation -->
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -307,3 +384,226 @@ include_once __DIR__ . '/includes/footer.php';
         offset: 100
     });
 </script>
+
+<!-- noUiSlider JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+
+<!-- Price Range Slider Script -->
+<script>
+    // Currency ranges configuration
+    const priceRanges = {
+        'USD': {
+            min: 0,
+            max: 22000000,
+            step: 100000,
+            symbol: '$',
+            prefix: 'US$'
+        },
+        'DOP': {
+            min: 0,
+            max: 50000000,
+            step: 500000,
+            symbol: 'RD$',
+            prefix: 'RD$'
+        }
+    };
+
+    // Get current currency from radio buttons
+    function getCurrentCurrency() {
+        const currencyRadio = document.querySelector('input[name="currency"]:checked');
+        return currencyRadio ? currencyRadio.value : 'DOP';
+    }
+
+    // Format price for display
+    function formatPrice(value, currency) {
+        const config = priceRanges[currency];
+        if (value === 0) return config.prefix + ' 0';
+        
+        // Convert to millions for better readability
+        if (value >= 1000000) {
+            const millions = value / 1000000;
+            return config.prefix + ' ' + (millions % 1 === 0 ? millions : millions.toFixed(1)) + 'M';
+        }
+        
+        // Convert to thousands
+        if (value >= 1000) {
+            const thousands = value / 1000;
+            return config.prefix + ' ' + (thousands % 1 === 0 ? thousands : thousands.toFixed(0)) + 'K';
+        }
+        
+        return config.prefix + ' ' + value.toLocaleString();
+    }
+
+    // Initialize slider
+    let priceSlider;
+    const sliderElement = document.getElementById('price-range-slider');
+    
+    function initializeSlider(currency) {
+        const config = priceRanges[currency];
+        
+        // Get current values from GET parameters or use defaults
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentMin = parseInt(urlParams.get('min_price')) || config.min;
+        const currentMax = parseInt(urlParams.get('max_price')) || config.max;
+        
+        // Destroy existing slider if it exists
+        if (priceSlider) {
+            priceSlider.destroy();
+        }
+        
+        // Create slider
+        noUiSlider.create(sliderElement, {
+            start: [currentMin, currentMax],
+            connect: true,
+            step: config.step,
+            range: {
+                'min': config.min,
+                'max': config.max
+            },
+            format: {
+                to: value => Math.round(value),
+                from: value => Math.round(value)
+            }
+        });
+        
+        priceSlider = sliderElement.noUiSlider;
+        
+        // Update displays when slider changes
+        priceSlider.on('update', function(values) {
+            const min = parseInt(values[0]);
+            const max = parseInt(values[1]);
+            
+            document.getElementById('price-min-display').textContent = formatPrice(min, currency);
+            document.getElementById('price-max-display').textContent = formatPrice(max, currency);
+            
+            document.getElementById('min_price').value = min;
+            document.getElementById('max_price').value = max === config.max ? '' : max;
+        });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentCurrency = getCurrentCurrency();
+        initializeSlider(currentCurrency);
+        
+        // Handle currency change
+        const currencyRadios = document.querySelectorAll('input[name="currency"]');
+        currencyRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                initializeSlider(this.value);
+            });
+        });
+        
+        // Auto-submit on slider change (optional - can be removed if prefer manual submit)
+        // priceSlider.on('change', function() {
+        //     document.getElementById('filterForm').submit();
+        // });
+    });
+</script>
+
+<style>
+    /* Currency Toggle Styles */
+    .currency-toggle {
+        display: flex;
+        gap: 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 4px;
+        position: relative;
+    }
+    
+    .currency-toggle input[type="radio"] {
+        display: none;
+    }
+    
+    .currency-toggle .currency-option {
+        flex: 1;
+        padding: 8px 16px;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .currency-toggle input[type="radio"]:checked + .currency-option {
+        background: linear-gradient(135deg, #d4af37 0%, #f4e5a1 100%);
+        color: #000;
+        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+    }
+    
+    .currency-toggle .currency-option:hover {
+        color: #000;
+    }
+    
+    /* noUiSlider Custom Styles */
+    #price-range-slider {
+        height: 8px;
+        margin: 20px 0;
+    }
+    
+    .noUi-target {
+        background: #e9ecef;
+        border-radius: 8px;
+        border: none;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .noUi-connect {
+        background: linear-gradient(90deg, #d4af37 0%, #f4e5a1 100%);
+        box-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+    }
+    
+    .noUi-handle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #d4af37;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .noUi-handle:before,
+    .noUi-handle:after {
+        display: none;
+    }
+    
+    .noUi-handle:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+    
+    .noUi-handle:active {
+        transform: scale(1.05);
+    }
+    
+    .noUi-tooltip {
+        display: none;
+    }
+    
+    /* Price Display Styles */
+    .price-display {
+        min-width: 120px;
+    }
+    
+    .price-display .fw-bold {
+        font-size: 1.1rem;
+        color: #d4af37;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .currency-toggle .currency-option {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        
+        #price-range-slider {
+            margin: 15px 10px;
+        }
+    }
+</style>

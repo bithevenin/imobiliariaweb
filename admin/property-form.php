@@ -29,6 +29,13 @@ if ($property_id) {
                 $property['currency'] = 'USD';
             }
         }
+
+        // Extraer ciudad/sector de location si están vacíos (migración automática)
+        if (empty($property['ciudad']) && !empty($property['location'])) {
+            $parts = explode(',', $property['location'], 2);
+            $property['ciudad'] = trim($parts[0] ?? '');
+            $property['sector'] = trim($parts[1] ?? '');
+        }
     }
 }
 
@@ -39,6 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Limpiar precio de formato (RD$ 1,000.00 -> 1000.00)
         $clean_price = preg_replace('/[^\d.]/', '', $_POST['price']);
+
+        // Procesar ciudad y sector
+        $ciudad = sanitize_input($_POST['ciudad'] ?? '');
+        $sector = sanitize_input($_POST['sector'] ?? '');
+
+        // Auto-generar location como "Ciudad, Sector"
+        $location_parts = array_filter([$ciudad, $sector]);
+        $auto_location = implode(', ', $location_parts);
+
         $data = [
             'title' => sanitize_input($_POST['title']),
             'description' => sanitize_input($_POST['description']),
@@ -47,7 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'bedrooms' => (int) $_POST['bedrooms'],
             'bathrooms' => (int) $_POST['bathrooms'],
             'area' => (float) $_POST['area'],
-            'location' => sanitize_input($_POST['location']),
+            'ciudad' => $ciudad,
+            'sector' => $sector,
+            'location' => $auto_location,
             'address' => sanitize_input($_POST['address']),
             'status' => sanitize_input($_POST['status']),
             'featured' => isset($_POST['featured']) ? true : false,
@@ -435,18 +453,40 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                         (m²)</label><input type="number" class="form-control form-control-sm"
                                         name="area" value="<?php echo $property['area'] ?? ''; ?>"></div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold">Ubicación *</label>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Ciudad *</label>
+                                    <select class="form-select form-select-sm" name="ciudad" id="ciudad" required>
+                                        <option value="">Seleccionar...</option>
+                                        <?php
+                                        $cities = ['Santo Domingo', 'Santiago', 'Punta Cana', 'La Romana', 'Puerto Plata', 'La Vega', 'San Cristóbal', 'Bávaro'];
+                                        foreach ($cities as $city) {
+                                            $selected = ($property['ciudad'] ?? '') === $city ? 'selected' : '';
+                                            echo "<option value='$city' $selected>$city</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Sector</label>
+                                    <input type="text" class="form-control form-control-sm" name="sector" id="sector"
+                                        value="<?php echo $property['sector'] ?? ''; ?>"
+                                        placeholder="Ej: Piantini, Naco...">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Ubicación (Auto)</label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control" name="location" id="location"
-                                            value="<?php echo $property['location'] ?? ''; ?>" required>
+                                            value="<?php echo $property['location'] ?? ''; ?>" readonly>
                                         <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal"
-                                            data-bs-target="#mapModal"><i class="fas fa-map-marker-alt"></i></button>
+                                            data-bs-target="#mapModal" title="Seleccionar en mapa"><i
+                                                class="fas fa-map-marker-alt"></i></button>
                                     </div>
+                                    <small class="text-muted">Se auto-completa con Ciudad + Sector</small>
                                 </div>
-                                <div class="col-md-6"><label class="form-label small fw-bold">Dirección</label><input
-                                        type="text" class="form-control form-control-sm" name="address"
-                                        value="<?php echo $property['address'] ?? ''; ?>"></div>
+                                <div class="col-md-12"><label class="form-label small fw-bold">Dirección
+                                        Completa</label><input type="text" class="form-control form-control-sm"
+                                        name="address" value="<?php echo $property['address'] ?? ''; ?>"
+                                        placeholder="Calle, número, edificio, etc."></div>
 
                                 <div class="col-6 col-md-4">
                                     <label class="form-label small fw-bold">Estado</label>
@@ -554,6 +594,23 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
         }
         if (sidebarOverlay) {
             sidebarOverlay.onclick = () => { sidebar.classList.remove('active'); sidebarOverlay.classList.remove('active'); }
+        }
+
+        // Auto-complete location field from ciudad + sector
+        const ciudadField = document.getElementById('ciudad');
+        const sectorField = document.getElementById('sector');
+        const locationField = document.getElementById('location');
+        
+        function updateLocation() {
+            const ciudad = ciudadField.value.trim();
+            const sector = sectorField.value.trim();
+            const parts = [ciudad, sector].filter(p => p);
+            locationField.value = parts.join(', ');
+        }
+        
+        if (ciudadField && sectorField && locationField) {
+            ciudadField.addEventListener('change', updateLocation);
+            sectorField.addEventListener('input', updateLocation);
         }
 
         // Logic for previews

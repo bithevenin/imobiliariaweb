@@ -97,7 +97,6 @@ if (!defined('SITE_NAME')) {
                         &copy;
                         <?php echo date('Y'); ?>
                         <?php echo SITE_NAME; ?>. Todos los derechos reservados.
-                        | Diseñado con <i class="fas fa-heart text-gold"></i> para tu éxito
                     </p>
                 </div>
                 <div class="col-md-4 text-md-end mt-2 mt-md-0">

@@ -64,8 +64,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         <div class="container">
             <!-- Logo -->
             <a class="navbar-brand" href="<?php echo SITE_URL; ?>/index.php">
-                <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="<?php echo SITE_NAME; ?>"
-                    class="navbar-logo" style="height: 40px; width: auto;">
+                <span class="navbar-logo-text">IBRON INMOBILIARIA SRL</span>
             </a>
 
             <!-- Mobile Toggle -->

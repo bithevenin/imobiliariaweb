@@ -28,26 +28,124 @@ if ($featured_properties === false) {
 include_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- Hero Section -->
-<section class="hero">
+<!-- Hero Section with Advanced Search -->
+<section class="hero hero-with-search">
     <div class="hero-content">
-        <h1 class="hero-title" data-aos="fade-up">
-            <?php echo SITE_NAME; ?>
-        </h1>
-        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">
-            <?php echo SITE_TAGLINE; ?>
-        </p>
-        <p class="hero-description" data-aos="fade-up" data-aos-delay="200">
+        <!-- Search form focus -->
+        <p class="hero-description" data-aos="fade-up">
             Encuentra la propiedad de tus sueños. Ofrecemos las mejores opciones en
             casas, apartamentos, villas y solares en República Dominicana.
         </p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap" data-aos="fade-up" data-aos-delay="300">
-            <a href="<?php echo SITE_URL; ?>/properties.php" class="btn btn-primary btn-lg">
-                <i class="fas fa-search me-2"></i>Ver Propiedades
-            </a>
-            <a href="#contacto" class="btn btn-outline-gold btn-lg">
-                <i class="fas fa-phone me-2"></i>Contáctanos
-            </a>
+
+        <!-- Advanced Search Form -->
+        <div class="search-form-container" data-aos="fade-up" data-aos-delay="300">
+            <form method="GET" action="<?php echo SITE_URL; ?>/properties.php" class="property-search-form">
+                <div class="search-grid">
+                    <!-- Tipo de Propiedad -->
+                    <div class="search-field">
+                        <label for="search-type" class="search-label">
+                            <i class="fas fa-home"></i> Tipo de Propiedad
+                        </label>
+                        <select class="form-select search-select" id="search-type" name="type">
+                            <option value="">Seleccionar</option>
+                            <option value="Casa">Casa</option>
+                            <option value="Apartamento">Apartamento</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Solar">Solar</option>
+                            <option value="Penthouse">Penthouse</option>
+                            <option value="Local Comercial">Local Comercial</option>
+                            <option value="Oficina">Oficina</option>
+                        </select>
+                    </div>
+
+                    <!-- Ciudad -->
+                    <div class="search-field">
+                        <label for="search-ciudad" class="search-label">
+                            <i class="fas fa-map-marker-alt"></i> Ciudad
+                        </label>
+                        <select class="form-select search-select" id="search-ciudad" name="ciudad">
+                            <option value="">Seleccionar</option>
+                            <option value="Santo Domingo">Santo Domingo</option>
+                            <option value="Santiago">Santiago</option>
+                            <option value="Punta Cana">Punta Cana</option>
+                            <option value="La Romana">La Romana</option>
+                            <option value="Puerto Plata">Puerto Plata</option>
+                            <option value="La Vega">La Vega</option>
+                            <option value="San Cristóbal">San Cristóbal</option>
+                            <option value="Bávaro">Bávaro</option>
+                        </select>
+                    </div>
+
+                    <!-- Sector -->
+                    <div class="search-field">
+                        <label for="search-sector" class="search-label">
+                            <i class="fas fa-location-dot"></i> Sector
+                        </label>
+                        <input type="text" class="form-control search-input" id="search-sector" name="search"
+                            placeholder="Ej: Piantini, Naco...">
+                    </div>
+
+                    <!-- Habitaciones -->
+                    <div class="search-field">
+                        <label for="search-bedrooms" class="search-label">
+                            <i class="fas fa-bed"></i> Habitaciones
+                        </label>
+                        <select class="form-select search-select" id="search-bedrooms" name="bedrooms">
+                            <option value="">Seleccionar</option>
+                            <option value="1">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+
+                    <!-- Baños -->
+                    <div class="search-field">
+                        <label for="search-bathrooms" class="search-label">
+                            <i class="fas fa-bath"></i> Baños
+                        </label>
+                        <select class="form-select search-select" id="search-bathrooms" name="bathrooms">
+                            <option value="">Seleccionar</option>
+                            <option value="1">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="search-field">
+                        <label for="search-price" class="search-label">
+                            <i class="fas fa-dollar-sign"></i> Precio
+                        </label>
+                        <select class="form-select search-select" id="search-price" name="precio">
+                            <option value="">Seleccionar</option>
+                            <optgroup label="Pesos Dominicanos">
+                                <option value="dop-0-5m">RD$0 - RD$5M</option>
+                                <option value="dop-5m-10m">RD$5M - RD$10M</option>
+                                <option value="dop-10m-20m">RD$10M - RD$20M</option>
+                                <option value="dop-20m-50m">RD$20M - RD$50M</option>
+                                <option value="dop-50m+">RD$50M+</option>
+                            </optgroup>
+                            <optgroup label="Dólares">
+                                <option value="usd-0-100k">US$0 - US$100K</option>
+                                <option value="usd-100k-500k">US$100K - US$500K</option>
+                                <option value="usd-500k-1m">US$500K - US$1M</option>
+                                <option value="usd-1m-5m">US$1M - US$5M</option>
+                                <option value="usd-5m+">US$5M+</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <div class="search-button-wrapper">
+                    <button type="submit" class="btn btn-primary btn-lg search-btn">
+                        <i class="fas fa-search me-2"></i>Buscar Propiedades
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </section>

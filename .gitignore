@@ -1,0 +1,28 @@
+# PHP
+vendor/
+composer.lock
+.phpunit.result.cache
+
+# Logs
+logs/*.log
+*.log
+
+# XAMPP / Local
+.htaccess_local
+temp/
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.project
+.settings/
+.buildpath
+
+# Project specific
+uploads/
+assets/images/uploads/

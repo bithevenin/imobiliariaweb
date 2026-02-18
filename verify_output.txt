@@ -1,0 +1,4 @@
+﻿User: admin
+Hash: $2y$10$iX7AQcL7I1EAMwrFFqS5qeGTOofSB9ljZyR2DCTk6tZxpQICyM1G
+Length: 59
+Verify '123': FALSE

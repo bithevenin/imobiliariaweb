@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Disallow admin area
+Disallow: /admin/
+
+# Disallow config files
+Disallow: /config/
+
+# Disallow database files
+Disallow: /database/
+
+# Disallow includes
+Disallow: /includes/
+
+# Allow uploads (images are public)
+Allow: /uploads/
+
+# Sitemap location
+Sitemap: http://localhost/Inmobiliaria/sitemap.xml

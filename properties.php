@@ -20,7 +20,10 @@ $precio_range = isset($_GET['precio']) ? sanitize_input($_GET['precio']) : '';
 $min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float) $_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float) $_GET['max_price'] : PHP_FLOAT_MAX;
 $status_filter = isset($_GET['status']) ? sanitize_input($_GET['status']) : '';
-$currency_filter = isset($_GET['currency']) ? sanitize_input($_GET['currency']) : 'DOP';
+$currency_filter = isset($_GET['currency']) ? sanitize_input($_GET['currency']) : ''; // Defaults to empty to show all
+
+// Exchange rate
+$exchange_rate = defined('CURRENCY_EXCHANGE_RATE') ? CURRENCY_EXCHANGE_RATE : 60.0;
 
 // Procesar rango de precio de la portada (ej: usd-100k-500k)
 if ($precio_range) {
@@ -73,7 +76,7 @@ if ($all_properties === false) {
 }
 
 // Filtrar en PHP (para búsquedas complejas o campos no indexados)
-$filtered_properties = array_filter($all_properties ?? [], function ($property) use ($search, $bedrooms_filter, $bathrooms_filter, $min_price, $max_price, $currency_filter) {
+$filtered_properties = array_filter($all_properties ?? [], function ($property) use ($search, $bedrooms_filter, $bathrooms_filter, $min_price, $max_price, $currency_filter, $exchange_rate) {
     // 1. Búsqueda por texto (Título, Ubicación, Sector)
     if ($search) {
         $search_found = stripos($property['title'] ?? '', $search) !== false ||
@@ -92,7 +95,7 @@ $filtered_properties = array_filter($all_properties ?? [], function ($property) 
         return false;
     }
     
-    // 4. Filtro de Moneda y Precio
+    // 4. Filtro de Moneda y Precio Inteligente
     $property_price = (float) ($property['price'] ?? 0);
     $property_currency = 'DOP'; // Default
     if (!empty($property['features'])) {
@@ -105,11 +108,26 @@ $filtered_properties = array_filter($all_properties ?? [], function ($property) 
         }
     }
     
-    if ($property_currency !== $currency_filter) {
+    // 4a. Filtro de Moneda explícito (si se seleccionó)
+    if ($currency_filter && $property_currency !== $currency_filter) {
         return false;
     }
     
-    if ($property_price < $min_price || $property_price > $max_price) {
+    // 4b. Filtro de Precio con conversión cruzada
+    // Usamos el currency_filter como la moneda de referencia del usuario. 
+    // Si no hay currency_filter, usamos la moneda de la propiedad tal cual.
+    $reference_currency = $currency_filter ?: $property_currency;
+    
+    $comparable_price = $property_price;
+    if ($property_currency !== $reference_currency) {
+        if ($property_currency === 'USD' && $reference_currency === 'DOP') {
+            $comparable_price = $property_price * $exchange_rate;
+        } elseif ($property_currency === 'DOP' && $reference_currency === 'USD') {
+            $comparable_price = $property_price / $exchange_rate;
+        }
+    }
+    
+    if ($comparable_price < $min_price || $comparable_price > $max_price) {
         return false;
     }
     
@@ -141,213 +159,179 @@ include_once __DIR__ . '/includes/header.php';
     </div>
 </section>
 
-<!-- Filtros -->
+<!-- Contenido Principal -->
 <section class="section-padding bg-light">
     <div class="container">
-        <div class="bg-white p-4 rounded shadow-sm">
-            <form method="GET" action="" id="filterForm">
-                <div class="row g-3">
-                    <!-- Búsqueda -->
-                    <div class="col-lg-3 col-md-6">
-                        <label for="search" class="form-label">
-                            <i class="fas fa-search text-gold me-2"></i>Buscar
-                        </label>
-                        <input type="text" class="form-control" id="search" name="search"
-                            placeholder="Ubicación o nombre..." value="<?php echo escape_output($search); ?>">
-                    </div>
-
-                    <!-- Tipo de Propiedad -->
-                    <div class="col-lg-3 col-md-6">
-                        <label for="type" class="form-label">
-                            <i class="fas fa-home text-gold me-2"></i>Tipo de Propiedad
-                        </label>
-                        <select class="form-select" id="type" name="type">
-                            <option value="">Todos los tipos</option>
-                            <option value="Casa" <?php echo $type_filter === 'Casa' ? 'selected' : ''; ?>>Casa</option>
-                            <option value="Apartamento" <?php echo $type_filter === 'Apartamento' ? 'selected' : ''; ?>>
-                                Apartamento</option>
-                            <option value="Villa" <?php echo $type_filter === 'Villa' ? 'selected' : ''; ?>>Villa</option>
-                            <option value="Solar" <?php echo $type_filter === 'Solar' ? 'selected' : ''; ?>>Solar</option>
-                            <option value="Penthouse" <?php echo $type_filter === 'Penthouse' ? 'selected' : ''; ?>>
-                                Penthouse</option>
-                            <option value="Local Comercial" <?php echo $type_filter === 'Local Comercial' ? 'selected' : ''; ?>>Local Comercial</option>
-                            <option value="Oficina" <?php echo $type_filter === 'Oficina' ? 'selected' : ''; ?>>Oficina
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Currency Selector -->
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label">
-                            <i class="fas fa-dollar-sign text-gold me-2"></i>Moneda
-                        </label>
-                        <div class="currency-toggle">
-                            <input type="radio" name="currency" id="currency-dop" value="DOP" 
-                                <?php echo (!isset($_GET['currency']) || $_GET['currency'] === 'DOP') ? 'checked' : ''; ?>>
-                            <label for="currency-dop" class="currency-option">
-                                <i class="fas fa-peso-sign"></i> DOP
-                            </label>
-                            
-                            <input type="radio" name="currency" id="currency-usd" value="USD"
-                                <?php echo (isset($_GET['currency']) && $_GET['currency'] === 'USD') ? 'checked' : ''; ?>>
-                            <label for="currency-usd" class="currency-option">
-                                <i class="fas fa-dollar-sign"></i> USD
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="col-lg-3 col-md-6">
-                        <label for="status" class="form-label">
-                            <i class="fas fa-tag text-gold me-2"></i>Estado
-                        </label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="">Todos</option>
-                            <option value="Disponible" <?php echo $status_filter === 'Disponible' ? 'selected' : ''; ?>>
-                                Disponible</option>
-                            <option value="Vendida" <?php echo $status_filter === 'Vendida' ? 'selected' : ''; ?>>Vendida
-                            </option>
-                            <option value="Reservada" <?php echo $status_filter === 'Reservada' ? 'selected' : ''; ?>>
-                                Reservada</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Price Range Slider Row -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <label class="form-label">
-                            <i class="fas fa-chart-line text-gold me-2"></i>Rango de Precio
-                        </label>
-                        
-                        <!-- Price Display -->
-                        <div class="d-flex justify-content-between mb-2">
-                            <div class="price-display">
-                                <small class="text-muted">Mínimo</small>
-                                <div class="fw-bold" id="price-min-display">$0</div>
-                            </div>
-                            <div class="price-display text-end">
-                                <small class="text-muted">Máximo</small>
-                                <div class="fw-bold" id="price-max-display">$22M</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Range Slider -->
-                        <div id="price-range-slider" class="mb-3"></div>
-                        
-                        <!-- Hidden inputs for form submission -->
-                        <input type="hidden" name="min_price" id="min_price" value="<?php echo $min_price; ?>">
-                        <input type="hidden" name="max_price" id="max_price" value="<?php echo $max_price > 0 && $max_price < PHP_FLOAT_MAX ? $max_price : ''; ?>">
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-filter me-2"></i>Aplicar Filtros
-                            </button>
-                            <a href="<?php echo SITE_URL; ?>/properties.php" class="btn btn-outline-gold">
-                                <i class="fas fa-redo me-2"></i>Limpiar Filtros
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</section>
-
-<!-- Resultados -->
-<section class="section-padding">
-    <div class="container">
-        <?php if (empty($filtered_properties)): ?>
-            <!-- No hay resultados -->
-            <div class="text-center py-5">
-                <i class="fas fa-search fa-4x text-gold mb-4"></i>
-                <h3>No se encontraron propiedades</h3>
-                <p class="text-muted mb-4">
-                    Intenta ajustar los filtros para obtener mejores resultados
-                </p>
-                <a href="<?php echo SITE_URL; ?>/properties.php" class="btn btn-primary">
-                    Ver Todas las Propiedades
-                </a>
-            </div>
-        <?php else: ?>
-            <!-- Grid de Propiedades -->
-            <div class="row g-4">
-                <?php foreach ($filtered_properties as $index => $property): ?>
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?php echo $index * 50; ?>">
-                        <div class="property-card">
-                            <div class="property-card-img">
-                                <img src="<?php echo escape_output($property['image_main'] ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop'); ?>"
-                                    alt="<?php echo escape_output($property['title']); ?>">
-                                <?php if ($property['status'] === 'Vendida'): ?>
-                                    <span class="property-badge sold">Vendida</span>
-                                <?php elseif ($property['status'] === 'Reservada'): ?>
-                                    <span class="property-badge reserved">Reservada</span>
-                                <?php endif; ?>
+        <div class="row">
+            <!-- Sidebar de Filtros -->
+            <div class="col-lg-3">
+                <div class="bg-white p-4 rounded shadow-sm sticky-sidebar mb-4">
+                    <h4 class="mb-4 d-flex align-items-center">
+                        <i class="fas fa-sliders-h text-gold me-2"></i>Filtros
+                    </h4>
+                    
+                    <form method="GET" action="" id="filterForm">
+                        <div class="row g-3">
+                            <!-- Búsqueda -->
+                            <div class="col-12">
+                                <label for="search" class="form-label">
+                                    <i class="fas fa-search text-gold me-2"></i>Buscar
+                                </label>
+                                <input type="text" class="form-control" id="search" name="search"
+                                    placeholder="Ubicación o nombre..." value="<?php echo escape_output($search); ?>">
                             </div>
 
-                            <div class="property-card-body">
-                                <div class="property-type"><?php echo escape_output($property['type']); ?></div>
-                                <h3 class="property-title"><?php echo escape_output($property['title']); ?></h3>
+                            <!-- Tipo de Propiedad -->
+                            <div class="col-12">
+                                <label for="type" class="form-label">
+                                    <i class="fas fa-home text-gold me-2"></i>Tipo
+                                </label>
+                                <select class="form-select" id="type" name="type">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="Casa" <?php echo $type_filter === 'Casa' ? 'selected' : ''; ?>>Casa</option>
+                                    <option value="Apartamento" <?php echo $type_filter === 'Apartamento' ? 'selected' : ''; ?>>Apartamento</option>
+                                    <option value="Villa" <?php echo $type_filter === 'Villa' ? 'selected' : ''; ?>>Villa</option>
+                                    <option value="Solar" <?php echo $type_filter === 'Solar' ? 'selected' : ''; ?>>Solar</option>
+                                    <option value="Penthouse" <?php echo $type_filter === 'Penthouse' ? 'selected' : ''; ?>>Penthouse</option>
+                                    <option value="Local Comercial" <?php echo $type_filter === 'Local Comercial' ? 'selected' : ''; ?>>Local Comercial</option>
+                                    <option value="Oficina" <?php echo $type_filter === 'Oficina' ? 'selected' : ''; ?>>Oficina</option>
+                                </select>
+                            </div>
 
-                                <div class="property-location">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <?php echo escape_output($property['location']); ?>
+                            <!-- Moneda -->
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-dollar-sign text-gold me-2"></i>Moneda
+                                </label>
+                                <div class="currency-toggle">
+                                    <input type="radio" name="currency" id="currency-all" value="" 
+                                        <?php echo ($currency_filter === '') ? 'checked' : ''; ?>>
+                                    <label for="currency-all" class="currency-option">Todas</label>
+
+                                    <input type="radio" name="currency" id="currency-dop" value="DOP" 
+                                        <?php echo ($currency_filter === 'DOP') ? 'checked' : ''; ?>>
+                                    <label for="currency-dop" class="currency-option">DOP</label>
+                                    
+                                    <input type="radio" name="currency" id="currency-usd" value="USD"
+                                        <?php echo ($currency_filter === 'USD') ? 'checked' : ''; ?>>
+                                    <label for="currency-usd" class="currency-option">USD</label>
                                 </div>
+                                <small class="text-muted mt-1 d-block">Tasa: 1 USD = <?php echo $exchange_rate; ?> DOP</small>
+                            </div>
 
-                                <?php if ($property['bedrooms'] > 0 || $property['bathrooms'] > 0): ?>
-                                    <div class="property-features">
-                                        <?php if ($property['bedrooms'] > 0): ?>
-                                            <div class="property-feature">
-                                                <i class="fas fa-bed"></i>
-                                                <span><?php echo $property['bedrooms']; ?> Hab.</span>
-                                            </div>
+                            <!-- Rango de Precio -->
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-chart-line text-gold me-2"></i>Precio
+                                </label>
+                                <div class="price-range-container">
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span id="price-min-display" class="fw-bold text-gold">$0</span>
+                                        <span id="price-max-display" class="fw-bold text-gold">$22M</span>
+                                    </div>
+                                    <div id="price-range-slider" class="mb-3"></div>
+                                    <input type="hidden" name="min_price" id="min_price" value="<?php echo $min_price; ?>">
+                                    <input type="hidden" name="max_price" id="max_price" value="<?php echo $max_price > 0 && $max_price < PHP_FLOAT_MAX ? $max_price : ''; ?>">
+                                </div>
+                            </div>
+
+                            <!-- Habitaciones -->
+                            <div class="col-12">
+                                <label for="bedrooms" class="form-label">
+                                    <i class="fas fa-bed text-gold me-2"></i>Habitaciones
+                                </label>
+                                <select class="form-select" id="bedrooms" name="bedrooms">
+                                    <option value="0">Cualquiera</option>
+                                    <option value="1" <?php echo $bedrooms_filter === 1 ? 'selected' : ''; ?>>1+</option>
+                                    <option value="2" <?php echo $bedrooms_filter === 2 ? 'selected' : ''; ?>>2+</option>
+                                    <option value="3" <?php echo $bedrooms_filter === 3 ? 'selected' : ''; ?>>3+</option>
+                                    <option value="4" <?php echo $bedrooms_filter === 4 ? 'selected' : ''; ?>>4+</option>
+                                </select>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="col-12">
+                                <label for="status" class="form-label">
+                                    <i class="fas fa-tag text-gold me-2"></i>Estado
+                                </label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">Todos</option>
+                                    <option value="Disponible" <?php echo $status_filter === 'Disponible' ? 'selected' : ''; ?>>Disponible</option>
+                                    <option value="Vendida" <?php echo $status_filter === 'Vendida' ? 'selected' : ''; ?>>Vendida</option>
+                                    <option value="Reservada" <?php echo $status_filter === 'Reservada' ? 'selected' : ''; ?>>Reservada</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 pt-3">
+                                <button type="submit" class="btn btn-primary w-100 mb-2">
+                                    <i class="fas fa-filter me-2"></i>Filtrar
+                                </button>
+                                <a href="<?php echo SITE_URL; ?>/properties.php" class="btn btn-outline-gold w-100">
+                                    <i class="fas fa-redo me-2"></i>Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Listado de Propiedades -->
+            <div class="col-lg-9">
+                <?php if (empty($filtered_properties)): ?>
+                    <div class="text-center py-5 bg-white rounded shadow-sm">
+                        <i class="fas fa-search fa-4x text-gold mb-4"></i>
+                        <h3>No se encontraron propiedades</h3>
+                        <p class="text-muted mb-4">Intenta ajustar los filtros para obtener mejores resultados</p>
+                        <a href="<?php echo SITE_URL; ?>/properties.php" class="btn btn-primary">Ver Todas</a>
+                    </div>
+                <?php else: ?>
+                    <div class="row g-4">
+                        <?php foreach ($filtered_properties as $index => $property): ?>
+                            <div class="col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="<?php echo $index * 50; ?>">
+                                <div class="property-card h-100">
+                                    <div class="property-card-img">
+                                        <img src="<?php echo escape_output($property['image_main'] ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop'); ?>"
+                                            alt="<?php echo escape_output($property['title']); ?>">
+                                        <?php if ($property['status'] === 'Vendida'): ?>
+                                            <span class="property-badge sold">Vendida</span>
+                                        <?php elseif ($property['status'] === 'Reservada'): ?>
+                                            <span class="property-badge reserved">Reservada</span>
                                         <?php endif; ?>
-
-                                        <?php if ($property['bathrooms'] > 0): ?>
-                                            <div class="property-feature">
-                                                <i class="fas fa-bath"></i>
-                                                <span><?php echo $property['bathrooms']; ?> Baños</span>
+                                    </div>
+                                    <div class="property-card-body">
+                                        <div class="property-type"><?php echo escape_output($property['type']); ?></div>
+                                        <h3 class="property-title"><?php echo escape_output($property['title']); ?></h3>
+                                        <div class="property-location"><i class="fas fa-map-marker-alt"></i> <?php echo escape_output($property['location']); ?></div>
+                                        <div class="property-features">
+                                            <?php if ($property['bedrooms'] > 0): ?>
+                                                <div class="property-feature"><i class="fas fa-bed"></i> <span><?php echo $property['bedrooms']; ?></span></div>
+                                            <?php endif; ?>
+                                            <?php if ($property['bathrooms'] > 0): ?>
+                                                <div class="property-feature"><i class="fas fa-bath"></i> <span><?php echo $property['bathrooms']; ?></span></div>
+                                            <?php endif; ?>
+                                            <div class="property-feature"><i class="fas fa-ruler-combined"></i> <span><?php echo format_area($property['area']); ?></span></div>
+                                        </div>
+                                        <div class="property-footer">
+                                            <div class="property-price">
+                                                <?php
+                                                $curr = 'DOP';
+                                                if (!empty($property['features'])) {
+                                                    $feats = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
+                                                    if (in_array('USD', $feats)) $curr = 'USD';
+                                                }
+                                                echo format_price($property['price'], $curr);
+                                                ?>
                                             </div>
-                                        <?php endif; ?>
-
-                                        <div class="property-feature">
-                                            <i class="fas fa-ruler-combined"></i>
-                                            <span><?php echo format_area($property['area']); ?></span>
+                                            <a href="<?php echo SITE_URL; ?>/property-detail.php?id=<?php echo $property['id']; ?>" class="btn btn-sm btn-outline-gold">Detalles</a>
                                         </div>
                                     </div>
-                                <?php endif; ?>
-
-                                <div class="property-footer">
-                                    <div class="property-price">
-                                        <?php
-                                        $curr = 'DOP';
-                                        if (!empty($property['features'])) {
-                                            $feats = is_array($property['features']) ? $property['features'] : pg_array_to_php_array($property['features']);
-                                            if (in_array('USD', $feats))
-                                                $curr = 'USD';
-                                        }
-                                        echo format_price($property['price'], $curr);
-                                        ?>
-                                    </div>
-                                    <?php if ($property['status'] === 'Disponible'): ?>
-                                        <a href="<?php echo SITE_URL; ?>/property-detail.php?id=<?php echo $property['id']; ?>"
-                                            class="btn btn-sm btn-outline-gold">
-                                            Ver Detalles
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">No disponible</span>
-                                    <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
+        </div>
     </div>
 </section>
 
@@ -411,7 +395,7 @@ include_once __DIR__ . '/includes/footer.php';
     // Get current currency from radio buttons
     function getCurrentCurrency() {
         const currencyRadio = document.querySelector('input[name="currency"]:checked');
-        return currencyRadio ? currencyRadio.value : 'DOP';
+        return (currencyRadio && currencyRadio.value) ? currencyRadio.value : 'DOP'; // Fallback to DOP if "Todas" is selected for UI limits
     }
 
     // Format price for display
@@ -583,6 +567,22 @@ include_once __DIR__ . '/includes/footer.php';
     
     .noUi-tooltip {
         display: none;
+    }
+    
+    /* Sidebar Styles */
+    .sticky-sidebar {
+        position: sticky;
+        top: 100px;
+        z-index: 10;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .price-range-container {
+        padding: 5px 10px;
+    }
+    
+    .text-gold {
+        color: #d4af37 !important;
     }
     
     /* Price Display Styles */

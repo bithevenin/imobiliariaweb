@@ -65,6 +65,7 @@ define('PROPERTIES_PER_PAGE', 12);
 define('FEATURED_PROPERTIES_LIMIT', 6);
 define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5 MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
+define('CURRENCY_EXCHANGE_RATE', 60.0); // 1 USD = 60 DOP
 
 // ============================================
 // RUTAS DEL SISTEMA

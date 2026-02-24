@@ -77,7 +77,7 @@ include_once __DIR__ . '/includes/header.php';
                                 <img src="<?php echo escape_output($gallery_images[0]); ?>"
                                     alt="<?php echo escape_output($property['title']); ?>"
                                     class="img-fluid w-100 rounded-top" id="mainImage"
-                                    style="max-height: 500px; object-fit: cover;">
+                                    style="max-height: 500px; object-fit: cover; cursor: zoom-in;" onclick="openLightbox()">
 
                                 <?php if (count($gallery_images) > 1): ?>
                                     <!-- Controles de Navegación -->
@@ -297,18 +297,22 @@ include_once __DIR__ . '/includes/header.php';
                                         value="Consulta sobre: <?php echo escape_output($property['title']); ?>">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Mensaje *</label>
-                                    <textarea class="form-control" name="message" rows="6" required>Hola, estoy interesado en la propiedad: <?php echo escape_output($property['title']); ?>
-
-Detalles de la propiedad:
-- Tipo: <?php echo escape_output($property['type']); ?>
-
-- Ubicación: <?php echo escape_output($property['location']); ?>
-
-- Precio: <?php echo format_price($property['price'], $currency); ?>
-
-
-Por favor, contáctenme con más información.</textarea>
+                                    <div class="p-3 bg-light rounded border mb-3">
+                                        <p class="mb-1 small text-muted text-uppercase fw-bold">Propiedad de interés:</p>
+                                        <div class="d-flex align-items-center">
+                                            <?php if (!empty($gallery_images)): ?>
+                                                <img src="<?php echo escape_output($gallery_images[0]); ?>" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <?php endif; ?>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold"><?php echo escape_output($property['title']); ?></h6>
+                                                <p class="mb-0 small text-gold fw-bold"><?php echo format_price($property['price'], $currency); ?> • <?php echo escape_output($property['type']); ?></p>
+                                                <p class="mb-0 x-small text-muted"><i class="fas fa-map-marker-alt me-1"></i><?php echo escape_output($property['location']); ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <label class="form-label">Tus comentarios o preguntas *</label>
+                                    <textarea class="form-control" name="comments" rows="4" placeholder="Escribe aquí tus dudas sobre esta propiedad..." required></textarea>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary w-100">
@@ -323,6 +327,37 @@ Por favor, contáctenme con más información.</textarea>
         </div>
     </div>
 </section>
+<!-- Lightbox Modal -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen p-0 m-0">
+        <div class="modal-content border-0 bg-dark bg-opacity-95">
+            <div class="modal-header border-0 p-3">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center p-0 position-relative">
+                <!-- Botones de Navegación del Lightbox -->
+                <button
+                    class="btn btn-link text-white position-absolute start-0 top-50 translate-middle-y ms-2 ms-md-4 lightbox-nav-btn"
+                    onclick="navigateImage(-1)">
+                    <i class="fas fa-chevron-left fa-2x"></i>
+                </button>
+                <button
+                    class="btn btn-link text-white position-absolute end-0 top-50 translate-middle-y me-2 ms-md-4 lightbox-nav-btn"
+                    onclick="navigateImage(1)">
+                    <i class="fas fa-chevron-right fa-2x"></i>
+                </button>
+
+                <img src="" id="lightboxImage" class="img-fluid" style="max-height: 90vh; object-fit: contain;">
+
+                <div
+                    class="position-absolute bottom-0 start-50 translate-middle-x mb-4 bg-dark bg-opacity-75 text-white px-4 py-2 rounded-pill small">
+                    <span id="lightboxCounter">1 / 1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .thumbnail-image.active {
@@ -336,12 +371,77 @@ Por favor, contáctenme con más información.</textarea>
     .sticky-top {
         position: sticky;
     }
+
+    /* Lightbox Styles */
+    #lightboxModal .modal-content {
+        background: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(5px);
+    }
+
+    .lightbox-nav-btn {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 1060;
+    }
+
+    .lightbox-nav-btn:hover {
+        background: rgba(212, 167, 69, 0.8);
+        color: white !important;
+        transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+        .lightbox-nav-btn {
+            width: 45px;
+            height: 45px;
+        }
+
+        .lightbox-nav-btn i {
+            font-size: 1.2rem;
+        }
+    }
 </style>
 
 <script>
     // Array de imágenes para la galería
     const galleryImages = <?php echo json_encode($gallery_images); ?>;
     let currentImageIndex = 0;
+    let lightboxModal;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('lightboxModal');
+        if (modalEl) {
+            lightboxModal = new bootstrap.Modal(modalEl);
+        }
+    });
+
+    // Abrir Lightbox
+    function openLightbox() {
+        if (!lightboxModal) return;
+        updateLightboxContent();
+        lightboxModal.show();
+    }
+
+    // Actualizar contenido del Lightbox
+    function updateLightboxContent() {
+        const lightboxImg = document.getElementById('lightboxImage');
+        const lightboxCounter = document.getElementById('lightboxCounter');
+
+        if (lightboxImg && galleryImages[currentImageIndex]) {
+            lightboxImg.src = galleryImages[currentImageIndex];
+        }
+
+        if (lightboxCounter) {
+            lightboxCounter.textContent = `${currentImageIndex + 1} / ${galleryImages.length}`;
+        }
+    }
 
     // Cambiar imagen principal
     function changeMainImage(imageSrc, thumbnail) {
@@ -373,6 +473,12 @@ Por favor, contáctenme con más información.</textarea>
 
         const newImageSrc = galleryImages[currentImageIndex];
         document.getElementById('mainImage').src = newImageSrc;
+
+        // Si el lightbox está abierto, actualizarlo también
+        const lightboxImg = document.getElementById('lightboxImage');
+        if (lightboxImg) {
+            updateLightboxContent();
+        }
 
         // Actualizar miniatura activa
         const thumbnails = document.querySelectorAll('.thumbnail-image');
@@ -414,6 +520,9 @@ Por favor, contáctenme con más información.</textarea>
 
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
+        
+        // El campo 'comments' será procesado por la API para incluir detalles de la propiedad
+        data.message = data.comments; 
 
         fetch('<?php echo SITE_URL; ?>/api/contact.php', {
             method: 'POST',

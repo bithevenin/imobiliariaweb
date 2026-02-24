@@ -66,11 +66,38 @@ if ($recent_messages && count($recent_messages) >= 3) {
     exit;
 }
 
+// SI hay property_id, armar el mensaje con datos VERIFICADOS del servidor
+if (!empty($property_id)) {
+    $prop_data = supabase_get('properties', ['id' => 'eq.' . $property_id], 'id,title,type,price,location,features');
+    if ($prop_data && count($prop_data) > 0) {
+        $p = $prop_data[0];
+
+        // Determinar moneda
+        $currency = 'DOP';
+        $features = !empty($p['features']) ? (is_array($p['features']) ? $p['features'] : pg_array_to_php_array($p['features'])) : [];
+        if (in_array('USD', $features))
+            $currency = 'USD';
+
+        $price_formatted = format_price($p['price'], $currency);
+
+        $verified_summary = "\n\n--- DETALLES DE LA PROPIEDAD ---\n";
+        $verified_summary .= "Propiedad: " . $p['title'] . "\n";
+        $verified_summary .= "ID: " . $p['id'] . "\n";
+        $verified_summary .= "Tipo: " . $p['type'] . "\n";
+        $verified_summary .= "Precio: " . $price_formatted . "\n";
+        $verified_summary .= "Ubicación: " . $p['location'] . "\n";
+        $verified_summary .= "------------------------------";
+
+        $message .= $verified_summary;
+    }
+}
+
 // Preparar datos para insertar
 $data = [
     'name' => $name,
     'email' => $email,
     'phone' => !empty($phone) ? $phone : null,
+    'property_id' => !empty($property_id) ? $property_id : null,
     'message' => $message,
     'ip_address' => $user_ip,
     'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,

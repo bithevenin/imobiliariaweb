@@ -234,6 +234,9 @@ document.addEventListener('DOMContentLoaded', function () {
             aspectRatio: 1.5,
             viewMode: 1,
             autoCropArea: 1,
+            responsive: true,
+            restore: false,
+            checkOrientation: true,
             ready: function () {
                 applyFiltersToPreview();
                 updateSizeInfo();

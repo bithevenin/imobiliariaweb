@@ -344,6 +344,15 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
         .cropper-container-wrapper {
             max-height: 500px;
             background: #f8f9fa;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #cropper-image {
+            max-width: 100%;
+            display: block;
         }
     </style>
 </head>

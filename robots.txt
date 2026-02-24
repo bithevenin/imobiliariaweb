@@ -17,4 +17,4 @@ Disallow: /includes/
 Allow: /uploads/
 
 # Sitemap location
-Sitemap: http://localhost/Inmobiliaria/sitemap.xml
+Sitemap: /sitemap.xml

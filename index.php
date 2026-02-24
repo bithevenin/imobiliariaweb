@@ -610,39 +610,42 @@ include_once __DIR__ . '/includes/footer.php';
     });
 
     // Manejo del formulario de contacto
-    document.getElementById('contactForm').addEventListener('submit', function (e) {
-        e.preventDefault();
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        const formData = new FormData(this);
-        const messageDiv = document.getElementById('formMessage');
-        const submitBtn = this.querySelector('button[type="submit"]');
+            const formData = new FormData(this);
+            const messageDiv = document.getElementById('formMessage');
+            const submitBtn = this.querySelector('button[type="submit"]');
 
-        // Deshabilitar botón durante envío
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            // Deshabilitar botón durante envío
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
 
-        // Enviar a API
-        fetch('<?php echo SITE_URL; ?>/api/contact.php', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message || '¡Mensaje enviado exitosamente!', 'success');
-                    document.getElementById('contactForm').reset();
-                } else {
-                    showToast(data.message || 'Error al enviar el mensaje', 'error');
-                }
-
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
+            // Enviar a API
+            fetch('<?php echo SITE_URL; ?>/api/contact.php', {
+                method: 'POST',
+                body: formData
             })
-            .catch(error => {
-                showToast('Error de conexión. Por favor intenta de nuevo.', 'error');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message || '¡Mensaje enviado exitosamente!', 'success');
+                        document.getElementById('contactForm').reset();
+                    } else {
+                        showToast(data.message || 'Error al enviar el mensaje', 'error');
+                    }
 
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
-            });
-    });
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
+                })
+                .catch(error => {
+                    showToast('Error de conexión. Por favor intenta de nuevo.', 'error');
+
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Mensaje';
+                });
+        });
+    }
 </script>

@@ -3,7 +3,7 @@
   
   <!-- Página de Inicio -->
   <url>
-    <loc>http://localhost/Inmobiliaria/index.php</loc>
+    <loc><?php require_once 'config/settings.php'; echo SITE_URL; ?>/index.php</loc>
     <lastmod><?php echo date('Y-m-d'); ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -11,7 +11,7 @@
   
   <!-- Página Acerca De -->
   <url>
-    <loc>http://localhost/Inmobiliaria/about.php</loc>
+    <loc><?php echo SITE_URL; ?>/about.php</loc>
     <lastmod><?php echo date('Y-m-d'); ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -19,7 +19,7 @@
   
   <!-- Página de Propiedades -->
   <url>
-    <loc>http://localhost/Inmobiliaria/properties.php</loc>
+    <loc><?php echo SITE_URL; ?>/properties.php</loc>
     <lastmod><?php echo date('Y-m-d'); ?></lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>

@@ -91,7 +91,6 @@ if (!empty($property_id)) {
         $message .= $verified_summary;
     }
 }
-
 // Preparar datos para insertar
 $data = [
     'name' => $name,

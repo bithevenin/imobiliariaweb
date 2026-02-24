@@ -313,6 +313,7 @@ include_once __DIR__ . '/includes/header.php';
                                     
                                     <label class="form-label">Tus comentarios o preguntas *</label>
                                     <textarea class="form-control" name="comments" rows="4" placeholder="Escribe aquí tus dudas sobre esta propiedad..." required></textarea>
+
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary w-100">
@@ -371,7 +372,6 @@ include_once __DIR__ . '/includes/header.php';
     .sticky-top {
         position: sticky;
     }
-
     /* Lightbox Styles */
     #lightboxModal .modal-content {
         background: rgba(0, 0, 0, 0.9) !important;
@@ -407,6 +407,7 @@ include_once __DIR__ . '/includes/header.php';
             font-size: 1.2rem;
         }
     }
+
 </style>
 
 <script>
@@ -442,6 +443,7 @@ include_once __DIR__ . '/includes/header.php';
             lightboxCounter.textContent = `${currentImageIndex + 1} / ${galleryImages.length}`;
         }
     }
+
 
     // Cambiar imagen principal
     function changeMainImage(imageSrc, thumbnail) {
@@ -520,9 +522,9 @@ include_once __DIR__ . '/includes/header.php';
 
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
-        
         // El campo 'comments' será procesado por la API para incluir detalles de la propiedad
         data.message = data.comments; 
+
 
         fetch('<?php echo SITE_URL; ?>/api/contact.php', {
             method: 'POST',

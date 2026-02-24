@@ -609,14 +609,14 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
         const ciudadField = document.getElementById('ciudad');
         const sectorField = document.getElementById('sector');
         const locationField = document.getElementById('location');
-        
+
         function updateLocation() {
             const ciudad = ciudadField.value.trim();
             const sector = sectorField.value.trim();
             const parts = [ciudad, sector].filter(p => p);
             locationField.value = parts.join(', ');
         }
-        
+
         if (ciudadField && sectorField && locationField) {
             ciudadField.addEventListener('change', updateLocation);
             sectorField.addEventListener('input', updateLocation);

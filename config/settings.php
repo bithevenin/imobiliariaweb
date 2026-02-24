@@ -12,8 +12,14 @@ define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
 
 // Auto-detectar SITE_URL basándose en la ubicación actual
-// Esto funciona tanto en localhost como en producción
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+// Soporta proxies inversos como los de Railway
+$protocol = 'http';
+if (
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+) {
+    $protocol = 'https';
+}
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
 // Obtener el path relativo del proyecto

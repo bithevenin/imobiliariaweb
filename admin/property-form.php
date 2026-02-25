@@ -468,12 +468,12 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                         <option value="">Seleccionar...</option>
                                         <?php
                                         $cities = [
-                                            'Azua', 'Bahoruco', 'Barahona', 'Dajabón',
+                                            'Azua', 'Bahoruco', 'Barahona', 'Bávaro', 'Dajabón',
                                             'Distrito Nacional', 'Duarte', 'Elías Piña', 'El Seibo',
-                                            'Espaillat', 'Hato Mayor', 'Hermanas Mirabal', 'Independencia',
+                                            'Espaillat', 'Hato Mayor', 'Hermanas Mirabal', 'Higüey', 'Independencia',
                                             'La Altagracia', 'La Romana', 'La Vega', 'María Trinidad Sánchez',
                                             'Monseñor Nouel', 'Monte Cristi', 'Monte Plata', 'Pedernales',
-                                            'Peravia', 'Puerto Plata', 'Samaná', 'San Cristóbal',
+                                            'Peravia', 'Puerto Plata', 'Punta Cana', 'Samaná', 'San Cristóbal',
                                             'San José de Ocoa', 'San Juan', 'San Pedro de Macorís',
                                             'Sánchez Ramírez', 'Santiago', 'Santiago Rodríguez',
                                             'Santo Domingo', 'Valverde'

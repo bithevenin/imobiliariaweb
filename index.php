@@ -68,6 +68,7 @@ include_once __DIR__ . '/includes/header.php';
                             <option value="Azua">Azua</option>
                             <option value="Bahoruco">Bahoruco</option>
                             <option value="Barahona">Barahona</option>
+                            <option value="Bávaro">Bávaro</option>
                             <option value="Dajabón">Dajabón</option>
                             <option value="Distrito Nacional">Distrito Nacional</option>
                             <option value="Duarte">Duarte</option>
@@ -76,6 +77,7 @@ include_once __DIR__ . '/includes/header.php';
                             <option value="Espaillat">Espaillat</option>
                             <option value="Hato Mayor">Hato Mayor</option>
                             <option value="Hermanas Mirabal">Hermanas Mirabal</option>
+                            <option value="Higüey">Higüey</option>
                             <option value="Independencia">Independencia</option>
                             <option value="La Altagracia">La Altagracia</option>
                             <option value="La Romana">La Romana</option>
@@ -87,6 +89,7 @@ include_once __DIR__ . '/includes/header.php';
                             <option value="Pedernales">Pedernales</option>
                             <option value="Peravia">Peravia</option>
                             <option value="Puerto Plata">Puerto Plata</option>
+                            <option value="Punta Cana">Punta Cana</option>
                             <option value="Samaná">Samaná</option>
                             <option value="San Cristóbal">San Cristóbal</option>
                             <option value="San José de Ocoa">San José de Ocoa</option>

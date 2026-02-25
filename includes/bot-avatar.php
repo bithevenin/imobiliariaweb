@@ -97,7 +97,7 @@
 .bot-container {
     position: fixed;
     bottom: 30px;
-    left: 30px;
+    right: 30px;
     z-index: 10000;
     font-family: 'Montserrat', sans-serif;
 }
@@ -153,7 +153,7 @@
 .bot-chat-window {
     position: absolute;
     bottom: 20px;
-    left: 10px;
+    right: 10px;
     width: 360px;
     height: 550px;
     background: var(--norvis-bg);
@@ -164,7 +164,7 @@
     flex-direction: column;
     overflow: hidden;
     transform: scale(0);
-    transform-origin: bottom left;
+    transform-origin: bottom right;
     transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     border: 1px solid rgba(212, 167, 69, 0.15);
     pointer-events: none;
@@ -256,7 +256,19 @@
 .btn-wa:hover { background: #1ebe57; transform: translateY(-1px); }
 
 @media (max-width: 500px) {
-    .bot-chat-window { width: calc(100vw - 40px); height: calc(100vh - 120px); left: -10px; bottom: 0; }
+    .bot-container { bottom: 20px; right: 20px; }
+    .bot-tooltip { left: auto; right: 40px; }
+    .bot-chat-window { 
+        position: fixed;
+        width: calc(100vw - 30px); 
+        height: 80vh; 
+        max-height: 600px;
+        right: 15px; 
+        bottom: 15px;
+        border-radius: 20px;
+    }
+    .chat-messages { padding: 15px; }
+    .suggest-btn { padding: 5px 10px; font-size: 10px; }
 }
 </style>
 
@@ -321,9 +333,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const apiUrl = '<?php echo SITE_URL; ?>/api/bot-search.php';
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ query: text })
             });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
             const data = await response.json();
             
             loader.remove();

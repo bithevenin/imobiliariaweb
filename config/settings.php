@@ -12,7 +12,6 @@ define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
 
 // Auto-detectar SITE_URL basándose en la ubicación actual
-// Soporta proxies inversos como los de Railway
 $protocol = 'http';
 if (
     (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
@@ -22,13 +21,16 @@ if (
 }
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-// Obtener el path relativo del proyecto
+// Determinar el path relativo del proyecto si estamos en una subcarpeta
 $script_file = str_replace('\\', '/', __FILE__);
 $doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
 $project_root = str_replace('\\', '/', dirname(__DIR__));
 
 // Calcular base_path eliminando el DOCUMENT_ROOT del path del proyecto
-$base_path = str_replace($doc_root, '', $project_root);
+$base_path = '';
+if (strncasecmp($project_root, $doc_root, strlen($doc_root)) === 0) {
+    $base_path = substr($project_root, strlen($doc_root));
+}
 
 // Asegurar que empiece con / y no termine con /
 $base_path = '/' . trim($base_path, '/');
@@ -66,6 +68,7 @@ define('FEATURED_PROPERTIES_LIMIT', 6);
 define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5 MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
 define('CURRENCY_EXCHANGE_RATE', 60.0); // 1 USD = 60 DOP
+define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'TU_API_KEY_AQUI'); // Se recomienda usar variable de entorno
 
 // ============================================
 // RUTAS DEL SISTEMA

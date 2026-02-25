@@ -97,7 +97,7 @@
 .bot-container {
     position: fixed;
     bottom: 30px;
-    right: 30px;
+    left: 30px;
     z-index: 10000;
     font-family: 'Montserrat', sans-serif;
 }
@@ -153,7 +153,7 @@
 .bot-chat-window {
     position: absolute;
     bottom: 20px;
-    right: 10px;
+    left: 10px;
     width: 360px;
     height: 550px;
     background: var(--norvis-bg);
@@ -164,7 +164,7 @@
     flex-direction: column;
     overflow: hidden;
     transform: scale(0);
-    transform-origin: bottom right;
+    transform-origin: bottom left;
     transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     border: 1px solid rgba(212, 167, 69, 0.15);
     pointer-events: none;
@@ -256,19 +256,25 @@
 .btn-wa:hover { background: #1ebe57; transform: translateY(-1px); }
 
 @media (max-width: 500px) {
-    .bot-container { bottom: 20px; right: 20px; }
-    .bot-tooltip { left: auto; right: 40px; }
+    .bot-container { bottom: 15px; left: 15px; }
+    .bot-tooltip { left: 45px; right: auto; }
     .bot-chat-window { 
         position: fixed;
-        width: calc(100vw - 30px); 
-        height: 80vh; 
-        max-height: 600px;
-        right: 15px; 
-        bottom: 15px;
-        border-radius: 20px;
+        width: 100%;
+        height: 85vh;
+        left: 0; 
+        bottom: 0;
+        border-radius: 25px 25px 0 0;
+        transform-origin: bottom center;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
     }
-    .chat-messages { padding: 15px; }
-    .suggest-btn { padding: 5px 10px; font-size: 10px; }
+    .chat-header { padding: 15px 20px; }
+    .chat-messages { padding: 15px; gap: 10px; }
+    .message { font-size: 13px; max-width: 90%; }
+    .chat-input-area { padding: 12px 15px; padding-bottom: env(safe-area-inset-bottom, 25px); }
+    #chat-input { font-size: 16px; padding: 10px 15px; }
+    #send-btn { width: 40px; height: 40px; }
+    .suggest-btn { padding: 6px 12px; font-size: 10px; }
 }
 </style>
 

@@ -204,6 +204,9 @@ $unread_count = count(array_filter($messages, fn($m) => ($m['status'] ?? '') ===
                     <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">
                         <i class="fas fa-home me-2"></i>Dashboard
                     </a>
+                    <a href="<?php echo SITE_URL; ?>/admin/analytics.php">
+                        <i class="fas fa-chart-line me-2"></i>Analíticas
+                    </a>
                     <a href="<?php echo SITE_URL; ?>/admin/properties-manage.php">
                         <i class="fas fa-building me-2"></i>Propiedades
                     </a>

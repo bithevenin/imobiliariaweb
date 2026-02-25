@@ -223,6 +223,9 @@ if ($all_messages !== false) {
                     <a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="<?php echo $page_title === 'Dashboard' ? 'active' : ''; ?>">
                         <i class="fas fa-home me-2"></i>Dashboard
                     </a>
+                    <a href="<?php echo SITE_URL; ?>/admin/analytics.php">
+                        <i class="fas fa-chart-line me-2"></i>Analíticas
+                    </a>
                     <a href="<?php echo SITE_URL; ?>/admin/properties-manage.php">
                         <i class="fas fa-building me-2"></i>Propiedades
                     </a>
@@ -303,17 +306,19 @@ if ($all_messages !== false) {
                         </div>
                     </div>
                     <div class="col-6 col-xl-3">
-                        <div class="stat-card">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <p class="text-muted small mb-1">Visitas</p>
-                                    <h3 class="mb-0 fw-bold text-primary"><?php echo number_format($stats['total_visits']); ?></h3>
-                                </div>
-                                <div class="stat-icon bg-info bg-opacity-10 text-info d-none d-sm-flex">
-                                    <i class="fas fa-eye"></i>
+                        <a href="analytics.php" class="text-decoration-none">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted small mb-1">Visitas</p>
+                                        <h3 class="mb-0 fw-bold text-primary"><?php echo number_format($stats['total_visits']); ?></h3>
+                                    </div>
+                                    <div class="stat-icon bg-info bg-opacity-10 text-info d-none d-sm-flex">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
 

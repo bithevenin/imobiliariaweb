@@ -6,9 +6,15 @@
 
 require_once __DIR__ . '/config/settings.php';
 require_once __DIR__ . '/config/supabase.php';
+require_once __DIR__ . '/config/analytics.php';
 
 // Obtener ID de la propiedad
 $property_id = $_GET['id'] ?? null;
+
+// Rastrear vista (antes de cualquier otra lógica de renderizado)
+if ($property_id) {
+    track_property_view($property_id);
+}
 
 if (!$property_id) {
     header('Location: ' . SITE_URL . '/properties.php');

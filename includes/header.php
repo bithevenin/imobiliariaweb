@@ -11,6 +11,16 @@ if (!defined('SITE_NAME')) {
 
 // Determinar la página actual para marcar activa en el menú
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
+
+// Rastrear visita general al sitio (si no es una página de propiedad que ya lo hace)
+if ($current_page !== 'property-detail' && function_exists('track_property_view')) {
+    // Requiere analytics.php (se incluye vía settings o manual)
+    if (!defined('ANALYTICS_LOADED')) {
+        require_once __DIR__ . '/../config/analytics.php';
+        define('ANALYTICS_LOADED', true);
+    }
+    track_property_view(null);
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -37,8 +47,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     </title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png">
-    <link rel="shortcut icon" type="image/x-icon" href="<?php echo SITE_URL; ?>/favicon.ico">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -63,7 +73,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <!-- Logo -->
-            <a class="navbar-brand" href="<?php echo SITE_URL; ?>/index.php">
+            <a class="navbar-brand d-flex align-items-center" href="<?php echo SITE_URL; ?>/index.php">
+                <img src="<?php echo SITE_URL; ?>/assets/images/logo.png" alt="Logo" style="height: 40px; margin-right: 10px;">
                 <span class="navbar-logo-text">IBRON INMOBILIARIA SRL</span>
             </a>
 

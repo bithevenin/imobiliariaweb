@@ -336,9 +336,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const loader = addMessage('<span class="loading-dots">Un momento</span>', 'bot-msg');
 
         try {
-            // Aseguramos que el path sea absoluto desde el dominio
-            const siteUrl = '<?php echo trim(SITE_URL, "/"); ?>';
-            const apiUrl = siteUrl + '/api/bot-search.php';
+            // Intentamos usar una ruta relativa al dominio (soporta subcarpetas)
+            const apiUrl = 'api/bot-search.php';
             
             console.log('Norvis connecting to:', apiUrl);
 
@@ -356,47 +355,71 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(`Server error: ${response.status}`);
             }
 
-            const data = await response.json();
-            console.log('Norvis response received:', data);
-            
-            loader.remove();
-
             if (data.success) {
-                // ... (rest of the success logic)
-                addMessage(data.message, 'bot-msg');
-
-                // --- REDIRECCIÓN AUTOMÁTICA A WHATSAPP ---
-                if (data.redirect_whatsapp && data.whatsapp_url) {
-                    setTimeout(() => {
-                        window.open(data.whatsapp_url, '_blank');
-                    }, 2000); 
-                }
-
-                // --- NAVEGACIÓN INTERNA EN EL SITIO ---
-                if (data.redirect_url) {
-                    setTimeout(() => {
-                        window.location.href = data.redirect_url;
-                    }, 2500); 
-                }
-
-                if (data.type === 'properties' && data.properties.length > 0) {
-                    data.properties.forEach(p => renderProperty(p));
-                }
-                if (data.links) {
-                    let linksHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">';
-                    data.links.forEach(l => {
-                        linksHtml += `<a href="${l.url}" target="_blank" style="background:white; border:1px solid #d4a745; color:#d4a745; padding:10px; border-radius:12px; text-decoration:none; font-size:12px; text-align:center; font-weight:600;"><i class="${l.icon} me-2"></i> ${l.label}</a>`;
-                    });
-                    linksHtml += '</div>';
-                    addMessage(linksHtml, 'bot-msg');
-                }
+                loader.remove();
+                processNorvisResponse(data);
             } else {
+                loader.remove();
                 addMessage(data.message || 'Lo siento, hubo un error.', 'bot-msg');
             }
         } catch (error) {
-            console.error('Norvis Connection Failure:', error);
+            console.error('Norvis Connection Failure (Attempt 1):', error);
+            
+            // INTENTO DE RESPALDO: Usar ruta absoluta si la relativa falla
+            try {
+                console.log('Retrying Norvis with absolute path...');
+                const siteUrl = '<?php echo trim(SITE_URL, "/"); ?>';
+                const absoluteUrl = siteUrl + '/api/bot-search.php';
+                
+                const response = await fetch(absoluteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: text })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Norvis connected (Absolute):', data);
+                    if (loader) loader.remove();
+                    processNorvisResponse(data);
+                    return;
+                }
+            } catch (relError) {
+                console.error('Norvis Connection Failure (Attempt 2):', relError);
+            }
+
             if (loader) loader.remove();
-            addMessage('Error de conexión con el servidor. Por favor revisa tu internet o intenta más tarde.', 'bot-msg');
+            addMessage('Error de conexión con Norvis. Revisa la consola (F12) o intenta más tarde.', 'bot-msg');
+        }
+    }
+
+    function processNorvisResponse(data) {
+        if (data.success) {
+            addMessage(data.message, 'bot-msg');
+
+            // --- REDIRECCIÓN AUTOMÁTICA A WHATSAPP ---
+            if (data.redirect_whatsapp && data.whatsapp_url) {
+                setTimeout(() => { window.open(data.whatsapp_url, '_blank'); }, 2000); 
+            }
+
+            // --- NAVEGACIÓN INTERNA EN EL SITIO ---
+            if (data.redirect_url) {
+                setTimeout(() => { window.location.href = data.redirect_url; }, 2500); 
+            }
+
+            if (data.type === 'properties' && data.properties.length > 0) {
+                data.properties.forEach(p => renderProperty(p));
+            }
+            if (data.links) {
+                let linksHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">';
+                data.links.forEach(l => {
+                    linksHtml += `<a href="${l.url}" target="_blank" style="background:white; border:1px solid #d4a745; color:#d4a745; padding:10px; border-radius:12px; text-decoration:none; font-size:12px; text-align:center; font-weight:600;"><i class="${l.icon} me-2"></i> ${l.label}</a>`;
+                });
+                linksHtml += '</div>';
+                addMessage(linksHtml, 'bot-msg');
+            }
+        } else {
+            addMessage(data.message || 'Lo siento, hubo un error.', 'bot-msg');
         }
     }
 

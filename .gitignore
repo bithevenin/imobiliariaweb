@@ -26,3 +26,9 @@ Thumbs.db
 # Project specific
 uploads/
 assets/images/uploads/
+
+# Secrets & Local Config (NEVER commit)
+config/local_keys.php
+
+# Debug files (remove after use)
+debug-norvis.php

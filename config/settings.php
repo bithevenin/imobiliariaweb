@@ -11,34 +11,25 @@
 define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
 
-// Auto-detectar protocolo (HTTP vs HTTPS)
-$protocol = 'http';
-if (
-    (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
-    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
-    (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https') ||
-    (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
-) {
+// Auto-detectar protocolo
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
     $protocol = 'https';
 }
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$host = $_SERVER['HTTP_HOST'];
 
-// Determinar el path relativo del proyecto si estamos en una subcarpeta
-$script_file = str_replace('\\', '/', __FILE__);
+// Detectar base_path relativo
+$script_path = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+$project_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+// Si el script está en una subcarpeta (como api/), necesitamos subir niveles
+// Pero SITE_URL se suele usar globalmente. Una forma más segura:
+$current_dir = str_replace('\\', '/', dirname(__FILE__)); // config/
+$root_dir = str_replace('\\', '/', dirname($current_dir)); // root/
 $doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
-$project_root = str_replace('\\', '/', dirname(__DIR__));
 
-// Calcular base_path eliminando el DOCUMENT_ROOT del path del proyecto
-$base_path = '';
-if (strncasecmp($project_root, $doc_root, strlen($doc_root)) === 0) {
-    $base_path = substr($project_root, strlen($doc_root));
-}
-
-// Asegurar que empiece con / y no termine con /
+$base_path = str_ireplace($doc_root, '', $root_dir);
 $base_path = '/' . trim($base_path, '/');
-if ($base_path === '/') {
-    $base_path = '';
-}
+if ($base_path === '/') $base_path = '';
 
 define('SITE_URL', $protocol . '://' . $host . $base_path);
 
@@ -70,7 +61,15 @@ define('FEATURED_PROPERTIES_LIMIT', 6);
 define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5 MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
 define('CURRENCY_EXCHANGE_RATE', 60.0); // 1 USD = 60 DOP
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'TU_API_KEY_AQUI'); // Se recomienda usar variable de entorno
+
+// Cargar API keys desde archivo local (no incluido en git)
+$local_keys_file = __DIR__ . '/local_keys.php';
+if (file_exists($local_keys_file)) {
+    require_once $local_keys_file;
+}
+if (!defined('GROQ_API_KEY')) {
+    define('GROQ_API_KEY', ''); // Definir vacío si no hay archivo local
+}
 
 // ============================================
 // RUTAS DEL SISTEMA

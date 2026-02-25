@@ -1,11 +1,16 @@
 <?php
-/**
- * Bot Search API (Groq Powered with Memory) - Ibron Inmobiliaria
- * Maneja las consultas del chat de Norvis usando Groq (Llama 3) y sesiones para memoria.
- */
+// Desactivar visualización de errores para que no corrompan el JSON
+ini_set('display_errors', 0);
+error_reporting(0);
+
+// Iniciar buffer de salida
+ob_start();
 
 require_once __DIR__ . '/../config/settings.php';
 require_once __DIR__ . '/../config/supabase.php';
+
+// Limpiar cualquier salida accidental de los includes
+ob_clean();
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');

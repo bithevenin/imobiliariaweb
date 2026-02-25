@@ -336,7 +336,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const loader = addMessage('<span class="loading-dots">Un momento</span>', 'bot-msg');
 
         try {
-            const apiUrl = '<?php echo SITE_URL; ?>/api/bot-search.php';
+            // Aseguramos que el path sea absoluto desde el dominio
+            const siteUrl = '<?php echo trim(SITE_URL, "/"); ?>';
+            const apiUrl = siteUrl + '/api/bot-search.php';
+            
+            console.log('Norvis connecting to:', apiUrl);
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 
@@ -347,14 +352,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
+                console.error('Norvis API Error Status:', response.status);
                 throw new Error(`Server error: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('Norvis response received:', data);
             
             loader.remove();
 
             if (data.success) {
+                // ... (rest of the success logic)
                 addMessage(data.message, 'bot-msg');
 
                 // --- REDIRECCIÓN AUTOMÁTICA A WHATSAPP ---
@@ -368,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.redirect_url) {
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
-                    }, 2500); // Un poco más de tiempo para que lean la confirmación
+                    }, 2500); 
                 }
 
                 if (data.type === 'properties' && data.properties.length > 0) {
@@ -386,8 +394,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 addMessage(data.message || 'Lo siento, hubo un error.', 'bot-msg');
             }
         } catch (error) {
+            console.error('Norvis Connection Failure:', error);
             if (loader) loader.remove();
-            addMessage('Error de conexión.', 'bot-msg');
+            addMessage('Error de conexión con el servidor. Por favor revisa tu internet o intenta más tarde.', 'bot-msg');
         }
     }
 

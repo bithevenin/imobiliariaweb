@@ -11,11 +11,13 @@
 define('SITE_NAME', 'Ibron Inmobiliaria, S.R.L.');
 define('SITE_TAGLINE', 'TU MEJOR INVERSION');
 
-// Auto-detectar SITE_URL basándose en la ubicación actual
+// Auto-detectar protocolo (HTTP vs HTTPS)
 $protocol = 'http';
 if (
-    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
-    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+    (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+    (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https') ||
+    (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
 ) {
     $protocol = 'https';
 }

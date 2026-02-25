@@ -47,8 +47,9 @@ if ($current_page !== 'property-detail' && function_exists('track_property_view'
     </title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
-    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="shortcut icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">

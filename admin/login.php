@@ -115,8 +115,9 @@ $page_title = 'Admin Login';
         rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
-    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="shortcut icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
 
     <style>

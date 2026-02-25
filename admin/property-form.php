@@ -184,8 +184,9 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
-    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=1.0">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="shortcut icon" type="image/png" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>/assets/images/favicon.png?v=3.0">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/style.css">
 
     <style>

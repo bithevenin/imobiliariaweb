@@ -201,6 +201,11 @@ if (!defined('SITE_NAME')) {
     }
 </script>
 
+<?php
+// Incluir Bot Animado "Norvis" en todas las páginas públicas
+include_once __DIR__ . '/bot-avatar.php';
+?>
+
 </body>
 
 </html>

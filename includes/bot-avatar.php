@@ -1,12 +1,13 @@
 <?php
 /**
  * Asistente Virtual Animado "Norvis" - Ibron Inmobiliaria
- * Bot 3D con personalidad, gestos aleatorios y saludo inicial.
+ * Bot 3D con personalidad, gestos aleatorios y sistema de chat inteligente.
  */
 ?>
 
+<!-- Contenedor del Bot -->
 <div class="bot-container" id="ai-bot">
-    <div class="bot-wrapper">
+    <div class="bot-wrapper" id="bot-avatar-trigger">
         <svg class="bot-svg" width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <!-- Sombra en el suelo -->
             <ellipse class="bot-shadow" cx="50" cy="115" rx="20" ry="5" fill="black" fill-opacity="0.2" />
@@ -29,279 +30,396 @@
                 <circle cx="21" cy="80" r="4" fill="#d4a745"/>
             </g>
             
-            <!-- Cabeza (Contenedor para rotación) -->
+            <!-- Cabeza -->
             <g class="bot-head-group">
                 <g class="bot-head">
                     <rect x="30" y="15" width="40" height="35" rx="12" fill="#2a2a2a" stroke="#d4a745" stroke-width="2"/>
-                    <!-- Pantalla/Cara -->
                     <rect x="35" y="20" width="30" height="20" rx="6" fill="#1a1a1a"/>
-                    
-                    <!-- Ojos -->
                     <g class="bot-eyes">
-                        <!-- Ojo Izquierdo -->
                         <g class="eye-group eye-left">
                             <circle cx="43" cy="30" r="3.5" fill="#d4a745" />
                             <rect class="eyelid" x="39" y="26" width="8" height="8" fill="#1a1a1a" transform="scale(1, 0)" transform-origin="43px 26px" />
                         </g>
-                        <!-- Ojo Derecho -->
                         <g class="eye-group eye-right">
                             <circle cx="57" cy="30" r="3.5" fill="#d4a745" />
                             <rect class="eyelid" x="53" y="26" width="8" height="8" fill="#1a1a1a" transform="scale(1, 0)" transform-origin="57px 26px" />
                         </g>
                     </g>
-                    
-                    <!-- Antena -->
                     <line x1="50" y1="15" x2="50" y2="5" stroke="#d4a745" stroke-width="2"/>
                     <circle class="bot-antenna-light" cx="50" cy="5" r="2.8" fill="#d4a745"/>
                 </g>
             </g>
         </svg>
         
-        <!-- Tooltip de Norvis -->
-        <div class="bot-tooltip" id="bot-message">¡Hola! ¿Cómo puedo ayudarte hoy?</div>
+        <div class="bot-tooltip" id="bot-bubble">¡Hola! ¿En qué puedo ayudarte?</div>
+    </div>
+
+    <!-- Interfaz de Chat Premium -->
+    <div class="bot-chat-window" id="bot-chat">
+        <div class="chat-header">
+            <div class="header-info">
+                <span class="status-dot"></span>
+                <strong>Norvis - Asistente Ibron</strong>
+            </div>
+            <button class="chat-close" id="close-chat">&times;</button>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot-msg">
+                ¡Hola! Me llamo Norvis 🤖. Estoy aquí para ayudarte a encontrar la casa de tus sueños. ¿Qué buscas hoy?
+            </div>
+        </div>
+
+        <div class="chat-suggestions" id="chat-suggestions">
+            <button class="suggest-btn" data-query="Quiero una vivienda">Quiero una vivienda</button>
+            <button class="suggest-btn" data-query="Hablar con representante">Representante</button>
+            <button class="suggest-btn" data-query="Redes Sociales">Redes Sociales</button>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Escribe aquí...">
+            <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </div>
 </div>
 
 <style>
 :root {
-    --bot-gold: #d4a745;
-    --bot-gold-light: #ffeb3b;
-    --bot-dark: #2a2a2a;
+    --norvis-gold: #d4a745;
+    --norvis-gold-light: #ffeb3b;
+    --norvis-dark: #1a1a1a;
+    --norvis-bg: rgba(255, 255, 255, 0.98);
+    --norvis-shadow: 0 10px 40px rgba(0,0,0,0.15);
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
 .bot-container {
     position: fixed;
     bottom: 30px;
     left: 30px;
-    z-index: 9999;
-    cursor: pointer;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.bot-container:hover {
-    transform: scale(1.15) rotate(2deg);
+    z-index: 10000;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .bot-wrapper {
-    position: relative;
-    filter: drop-shadow(0 12px 20px rgba(0,0,0,0.4));
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.2));
 }
 
-/* --- ANIMACIONES BASE --- */
+.bot-wrapper:hover { transform: scale(1.1); }
 
-/* Levitación */
-.bot-svg {
-    animation: bot-float 3.5s ease-in-out infinite;
-}
+/* --- ANIMACIONES NORVIS --- */
+.bot-svg { animation: bot-float 4s ease-in-out infinite; }
+@keyframes bot-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-@keyframes bot-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-}
+.eyelid { animation: blink-cycle 5s infinite; }
+@keyframes blink-cycle { 0%, 94%, 98%, 100% { transform: scale(1, 0); } 96% { transform: scale(1, 1); } }
 
-/* Sombra Dinámica */
-.bot-shadow {
-    animation: shadow-scale 3.5s ease-in-out infinite;
-    transform-origin: center;
-}
+.bot-arm-right { transform-origin: 79px 55px; animation: bot-wave 8s ease-in-out infinite; }
+@keyframes bot-wave { 0%, 90%, 100% { transform: rotate(0deg); } 93%, 97% { transform: rotate(-35deg); } 95% { transform: rotate(-10deg); } }
 
-@keyframes shadow-scale {
-    0%, 100% { transform: scale(1); opacity: 0.25; }
-    50% { transform: scale(0.75); opacity: 0.12; }
-}
+.bot-antenna-light { animation: antenna-glow 2s ease-in-out infinite; }
+@keyframes antenna-glow { 0%, 100% { fill: var(--norvis-gold); } 50% { fill: var(--norvis-gold-light); } }
 
-/* --- CABEZA Y GESTOS --- */
+/* Gestos JS */
+.gesture-jump { animation: bot-jump 0.5s ease-out; }
+@keyframes bot-jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25px); } }
+.gesture-spin { animation: bot-spin 0.6s ease-in-out; }
+@keyframes bot-spin { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
+.head-tilt-left { transform: rotate(-8deg); transition: 0.5s; }
+.head-tilt-right { transform: rotate(8deg); transition: 0.5s; }
+.head-look-up { transform: translateY(-2px) scale(1.02); transition: 0.5s; }
 
-.bot-head-group {
-    transform-origin: 50px 45px;
-    transition: transform 0.5s ease-in-out;
-}
-
-/* Movimiento de cabeza aleatorio (Clase añadida por JS) */
-.head-tilt-left { transform: rotate(-10deg); }
-.head-tilt-right { transform: rotate(10deg); }
-.head-look-up { transform: translateY(-3px) scale(1.02); }
-
-/* --- OJOS Y PESTAÑEO --- */
-
-.eyelid {
-    animation: blink-cycle 6s infinite;
-}
-
-@keyframes blink-cycle {
-    0%, 94%, 98%, 100% { transform: scale(1, 0); }
-    96% { transform: scale(1, 1); } /* El cierre rápido */
-}
-
-/* --- SALUDO Y BRAZOS --- */
-
-.bot-arm-right {
-    transform-origin: 79px 55px;
-    animation: bot-wave 6s ease-in-out infinite;
-}
-
-@keyframes bot-wave {
-    0%, 85%, 100% { transform: rotate(0deg); }
-    88%, 96% { transform: rotate(-45deg); }
-    92% { transform: rotate(-15deg); }
-}
-
-/* --- ANTENA --- */
-.bot-antenna-light {
-    animation: antenna-glow 1.5s ease-in-out infinite;
-}
-
-@keyframes antenna-glow {
-    0%, 100% { fill: var(--bot-gold); filter: drop-shadow(0 0 2px var(--bot-gold)); }
-    50% { fill: var(--bot-gold-light); filter: drop-shadow(0 0 6px var(--bot-gold-light)); }
-}
-
-/* --- TOOLTIP / DIÁLOGO --- */
-
+/* Tooltip */
 .bot-tooltip {
     position: absolute;
-    top: -45px;
-    left: 20px; /* Alineado un poco a la derecha del bot */
+    top: -55px;
+    left: 40px;
     background: white;
-    color: #222;
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 700;
-    white-space: normal; /* Permitir que el texto salte de línea si es largo */
-    max-width: 200px;    /* Limitar el ancho para que no se pierda */
-    width: max-content;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-bottom: 3px solid var(--bot-gold);
-}
-
-/* Triángulo del tooltip ajustado a la izquierda */
-.bot-tooltip::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 20px;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid white;
-}
-
-.bot-tooltip.visible, 
-.bot-container:hover .bot-tooltip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-bottom: 2px solid var(--norvis-gold);
+    white-space: nowrap;
     opacity: 1;
-    visibility: visible;
-    top: -60px;
+    transition: 0.3s;
 }
 
-/* --- GESTOS CHISTOSOS (Clases JS) --- */
-
-/* Salto de alegría */
-.gesture-jump {
-    animation: bot-jump 0.6s ease-out;
+/* Ventana de Chat Premium Optimizado */
+.bot-chat-window {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    width: 360px;
+    height: 550px;
+    background: var(--norvis-bg);
+    backdrop-filter: blur(10px); /* Reducido para mejor performance */
+    border-radius: 24px;
+    box-shadow: var(--norvis-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    border: 1px solid rgba(212, 167, 69, 0.15);
+    pointer-events: none;
 }
 
-@keyframes bot-jump {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-30px) scale(1.05); }
+.bot-chat-window.open {
+    transform: scale(1);
+    pointer-events: auto;
 }
 
-/* Giro emocionante */
-.gesture-spin {
-    animation: bot-spin 0.8s ease-in-out;
+.chat-header {
+    background: var(--norvis-dark);
+    color: white;
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--norvis-gold);
 }
 
-@keyframes bot-spin {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(360deg); }
+.header-info { display: flex; align-items: center; gap: 10px; }
+.status-dot { width: 9px; height: 9px; background: #4caf50; border-radius: 50%; box-shadow: 0 0 5px #4caf50; }
+
+.chat-close {
+    background: rgba(255,255,255,0.08); border: none; color: white;
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; transition: 0.2s;
+}
+.chat-close:hover { background: var(--norvis-gold); color: black; }
+
+.chat-messages {
+    flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+    background: linear-gradient(to bottom, rgba(212, 167, 69, 0.03), white);
 }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .bot-container { bottom: 20px; left: 15px; }
-    .bot-svg { width: 80px; height: 100px; }
-    .bot-tooltip { font-size: 12px; padding: 8px 14px; }
+.message {
+    max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5;
+    animation: msg-in 0.3s ease-out;
+}
+@keyframes msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.bot-msg { background: white; color: #444; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+.user-msg { background: var(--norvis-gold); color: white; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+
+.chat-suggestions { padding: 12px 15px; display: flex; flex-wrap: wrap; gap: 6px; background: white; border-top: 1px solid #f5f5f5; }
+.suggest-btn {
+    background: #f9f9f9; border: 1px solid #eee; color: #666; padding: 6px 14px; border-radius: 40px;
+    font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s;
+}
+.suggest-btn:hover { border-color: var(--norvis-gold); color: var(--norvis-gold); transform: translateY(-1px); }
+
+.chat-input-area { padding: 15px 20px; display: flex; gap: 10px; background: white; border-top: 1px solid #f5f5f5; }
+#chat-input {
+    flex: 1; border: 1px solid #eee; padding: 12px 18px; border-radius: 30px; outline: none;
+    font-size: 14px; transition: 0.2s; background: #fafafa;
+}
+#chat-input:focus { border-color: var(--norvis-gold); background: white; }
+
+#send-btn {
+    background: var(--norvis-dark); color: var(--norvis-gold); border: none;
+    width: 42px; height: 42px; border-radius: 50%; cursor: pointer; transition: 0.2s;
+}
+#send-btn:hover { background: var(--norvis-gold); color: white; transform: rotate(-5deg) scale(1.05); }
+
+/* Cards */
+.chat-property-card {
+    background: white; border-radius: 18px; overflow: hidden; border: 1px solid #eee;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06); margin-bottom: 5px;
+}
+.chat-property-card img { width: 100%; height: 130px; object-fit: cover; }
+.chat-property-info { padding: 15px; }
+.chat-property-type { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--norvis-gold); margin-bottom: 2px; }
+.chat-property-info h6 { margin: 0 0 5px 0; font-size: 14px; font-weight: 700; color: #333; line-height: 1.3; }
+.chat-property-location { font-size: 11px; color: #888; margin-bottom: 10px; }
+.chat-property-location i { margin-right: 4px; }
+
+.chat-property-stats { display: flex; gap: 12px; margin-bottom: 10px; padding: 8px 0; border-top: 1px solid #f5f5f5; border-bottom: 1px solid #f5f5f5; }
+.p-stat { font-size: 11px; color: #666; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.p-stat i { color: var(--norvis-gold); font-size: 12px; }
+
+.chat-property-price { color: var(--norvis-dark); font-weight: 800; font-size: 16px; margin-bottom: 12px; }
+.chat-property-links { display: flex; gap: 8px; }
+.chat-property-links a {
+    flex: 1; text-align: center; padding: 10px; font-size: 11px; font-weight: 700; text-decoration: none; border-radius: 12px;
+    transition: 0.2s;
+}
+.btn-details { background: #f8f8f8; color: #333; border: 1px solid #eee; }
+.btn-details:hover { background: #eee; }
+.btn-wa { background: #25d366; color: white; }
+.btn-wa:hover { background: #1ebe57; transform: translateY(-1px); }
+
+@media (max-width: 500px) {
+    .bot-chat-window { width: calc(100vw - 40px); height: calc(100vh - 120px); left: -10px; bottom: 0; }
 }
 </style>
 
 <script>
-/**
- * Lógica de Personalidad de Norvis
- */
 document.addEventListener('DOMContentLoaded', function() {
+    const trigger = document.getElementById('bot-avatar-trigger');
     const botContainer = document.getElementById('ai-bot');
     const botHead = document.querySelector('.bot-head-group');
-    const botMessage = document.getElementById('bot-message');
-    
-    // 1. SALUDO INICIAL
-    setTimeout(() => {
-        botMessage.textContent = "¡Hola! Me llamo Norvis 🤖";
-        botMessage.classList.add('visible');
-        
-        // Ejecutar un pequeño salto de alegría al presentarse
-        botContainer.classList.add('gesture-jump');
-        
-        // Ocultar saludo después de 4 segundos y volver al normal
-        setTimeout(() => {
-            botMessage.classList.remove('visible');
-            setTimeout(() => {
-                botMessage.textContent = "¿En qué puedo ayudarte?";
-            }, 500);
-        }, 4000);
-        
-        // Limpiar clase de animación
-        setTimeout(() => botContainer.classList.remove('gesture-jump'), 1000);
-    }, 1500);
+    const chatWindow = document.getElementById('bot-chat');
+    const closeChat = document.getElementById('close-chat');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const botBubble = document.getElementById('bot-bubble');
 
-    // 2. COMPORTAMIENTO ALEATORIO (Personalidad)
+    // 1. GESTOS DE PERSONALIDAD
     function performRandomGesture() {
+        if (chatWindow.classList.contains('open')) return;
+
         const rand = Math.random();
-        
-        // Limpiar gestos anteriores
         botContainer.classList.remove('gesture-jump', 'gesture-spin');
         botHead.classList.remove('head-tilt-left', 'head-tilt-right', 'head-look-up');
 
-        if (rand < 0.15) {
-            // Salto
-            botContainer.classList.add('gesture-jump');
-        } else if (rand < 0.30) {
-            // Giro
-            botContainer.classList.add('gesture-spin');
-        } else if (rand < 0.50) {
-            // Tildar cabeza izquierda
-            botHead.classList.add('head-tilt-left');
-        } else if (rand < 0.70) {
-            // Tildar cabeza derecha
-            botHead.classList.add('head-tilt-right');
-        } else if (rand < 0.85) {
-            // Mirar arriba
-            botHead.classList.add('head-look-up');
-        }
+        if (rand < 0.1) botContainer.classList.add('gesture-jump');
+        else if (rand < 0.2) botContainer.classList.add('gesture-spin');
+        else if (rand < 0.4) botHead.classList.add('head-tilt-left');
+        else if (rand < 0.6) botHead.classList.add('head-tilt-right');
         
-        // Programar el siguiente gesto (cada 4-8 segundos)
-        const nextGesture = Math.random() * 4000 + 4000;
-        setTimeout(performRandomGesture, nextGesture);
+        setTimeout(performRandomGesture, Math.random() * 5000 + 5000);
     }
-    
-    // Iniciar gestos
-    setTimeout(performRandomGesture, 8000);
+    setTimeout(performRandomGesture, 3000);
 
-    // 3. INTERACCIÓN AL CLIC
-    botContainer.addEventListener('click', function() {
-        // Al hacer clic, Norvis se emociona
-        botContainer.classList.add('gesture-jump');
-        botMessage.textContent = "¡Estoy listo para ayudarte!";
-        botMessage.classList.add('visible');
+    // 2. ABRIR / CERRAR CHAT
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = chatWindow.classList.toggle('open');
+        botBubble.style.opacity = isOpen ? '0' : '1';
         
-        setTimeout(() => {
-            botContainer.classList.remove('gesture-jump');
-            botMessage.classList.remove('visible');
-        }, 2000);
-        
-        // En el futuro, abrir aquí la interfaz de chat con IA
-        // showChatInterface(); 
+        if (isOpen) {
+            botContainer.classList.add('gesture-jump');
+            setTimeout(() => botContainer.classList.remove('gesture-jump'), 600);
+            chatInput.focus();
+        }
+    });
+
+    closeChat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatWindow.classList.remove('open');
+        botBubble.style.opacity = '1';
+    });
+
+    // 3. MENSAJERÍA
+    async function sendMessage(text) {
+        if (!text.trim()) return;
+
+        addMessage(text, 'user-msg');
+        chatInput.value = '';
+
+        const loader = addMessage('<span class="loading-dots">Un momento</span>', 'bot-msg');
+
+        try {
+            const apiUrl = '<?php echo SITE_URL; ?>/api/bot-search.php';
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: text })
+            });
+            const data = await response.json();
+            
+            loader.remove();
+
+            if (data.success) {
+                addMessage(data.message, 'bot-msg');
+
+                // --- REDIRECCIÓN AUTOMÁTICA A WHATSAPP ---
+                if (data.redirect_whatsapp && data.whatsapp_url) {
+                    setTimeout(() => {
+                        window.open(data.whatsapp_url, '_blank');
+                    }, 2000); 
+                }
+
+                // --- NAVEGACIÓN INTERNA EN EL SITIO ---
+                if (data.redirect_url) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 2500); // Un poco más de tiempo para que lean la confirmación
+                }
+
+                if (data.type === 'properties' && data.properties.length > 0) {
+                    data.properties.forEach(p => renderProperty(p));
+                }
+                if (data.links) {
+                    let linksHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">';
+                    data.links.forEach(l => {
+                        linksHtml += `<a href="${l.url}" target="_blank" style="background:white; border:1px solid #d4a745; color:#d4a745; padding:10px; border-radius:12px; text-decoration:none; font-size:12px; text-align:center; font-weight:600;"><i class="${l.icon} me-2"></i> ${l.label}</a>`;
+                    });
+                    linksHtml += '</div>';
+                    addMessage(linksHtml, 'bot-msg');
+                }
+            } else {
+                addMessage(data.message || 'Lo siento, hubo un error.', 'bot-msg');
+            }
+        } catch (error) {
+            if (loader) loader.remove();
+            addMessage('Error de conexión.', 'bot-msg');
+        }
+    }
+
+    function addMessage(text, type) {
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+        div.innerHTML = text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return div;
+    }
+
+    function renderProperty(p) {
+        const div = document.createElement('div');
+        div.className = 'chat-property-card';
+        // Formatear área si existe
+        const areaLabel = p.area > 0 ? `<div class="p-stat"><i class="fas fa-ruler-combined"></i> ${p.area} m²</div>` : '';
+        const bedLabel = p.bedrooms > 0 ? `<div class="p-stat"><i class="fas fa-bed"></i> ${p.bedrooms}</div>` : '';
+        const bathLabel = p.bathrooms > 0 ? `<div class="p-stat"><i class="fas fa-bath"></i> ${p.bathrooms}</div>` : '';
+
+        div.innerHTML = `
+            <img src="${p.image}" alt="${p.title}">
+            <div class="chat-property-info">
+                <div class="chat-property-type">${p.type}</div>
+                <h6>${p.title}</h6>
+                <div class="chat-property-location"><i class="fas fa-map-marker-alt"></i> ${p.location}</div>
+                
+                <div class="chat-property-stats">
+                    ${bedLabel}
+                    ${bathLabel}
+                    ${areaLabel}
+                </div>
+
+                <div class="chat-property-price">${p.price}</div>
+                <div class="chat-property-links">
+                    <a href="${p.url}" class="btn-details">Detalles</a>
+                    <a href="${p.whatsapp}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', () => sendMessage(chatInput.value));
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(chatInput.value); });
+
+    document.getElementById('chat-suggestions').addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggest-btn')) {
+            sendMessage(e.target.dataset.query);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!botContainer.contains(e.target) && chatWindow.classList.contains('open')) {
+            chatWindow.classList.remove('open');
+            botBubble.style.opacity = '1';
+        }
     });
 });
 </script>

@@ -198,6 +198,35 @@ include_once __DIR__ . '/includes/header.php';
                                 </select>
                             </div>
 
+                            <!-- Ciudad -->
+                            <div class="col-12">
+                                <label for="ciudad" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-gold me-2"></i>Ciudad/Ubicación
+                                </label>
+                                <select class="form-select" id="ciudad" name="ciudad">
+                                    <option value="">Todas las ubicaciones</option>
+                                    <?php
+                                    $cities = [
+                                        'Azua', 'Bahoruco', 'Baní', 'Barahona', 'Bávaro', 'Bayahibe', 'Boca Chica', 'Cabarete', 
+                                        'Casa de Campo', 'Constanza', 'Cotuí', 'Dajabón', 'Distrito Nacional', 'Duarte', 
+                                        'Elías Piña', 'El Seibo', 'Espaillat', 'Gaspar Hernández', 'Hato Mayor', 
+                                        'Hermanas Mirabal', 'Higüey', 'Independencia', 'Jarabacoa', 'Juan Dolio', 
+                                        'La Altagracia', 'La Romana', 'Las Galeras', 'Las Terrenas', 'La Vega', 
+                                        'Mao', 'María Trinidad Sánchez', 'Moca', 'Monseñor Nouel', 'Monte Cristi', 
+                                        'Monte Plata', 'Nagua', 'Pedernales', 'Peravia', 'Puerto Plata', 'Punta Cana', 
+                                        'Río San Juan', 'Samaná', 'San Cristóbal', 'San Francisco de Macorís', 
+                                        'San José de Ocoa', 'San Juan', 'San Pedro de Macorís', 'Sánchez Ramírez', 
+                                        'Santiago', 'Santiago Rodríguez', 'Santo Domingo Provincia', 'Santo Domingo Este', 
+                                        'Santo Domingo Norte', 'Santo Domingo Oeste', 'Sosúa', 'Valverde'
+                                    ];
+                                    foreach ($cities as $city) {
+                                        $selected = ($ciudad_filter === $city) ? 'selected' : '';
+                                        echo "<option value='$city' $selected>$city</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+
                             <!-- Moneda -->
                             <div class="col-12">
                                 <label class="form-label">

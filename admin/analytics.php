@@ -24,6 +24,7 @@ if ($analytics_data === false) $analytics_data = [];
 
 // 3. Obtener Propiedades para mapear nombres
 $properties = supabase_get('properties', [], 'id,title,views');
+if ($properties === false) $properties = [];
 $prop_map = [];
 foreach ($properties as $p) {
     $prop_map[$p['id']] = $p['title'];

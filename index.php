@@ -65,14 +65,38 @@ include_once __DIR__ . '/includes/header.php';
                         </label>
                         <select class="form-select search-select" id="search-ciudad" name="ciudad">
                             <option value="">Seleccionar</option>
-                            <option value="Santo Domingo">Santo Domingo</option>
-                            <option value="Santiago">Santiago</option>
-                            <option value="Punta Cana">Punta Cana</option>
+                            <option value="Azua">Azua</option>
+                            <option value="Bahoruco">Bahoruco</option>
+                            <option value="Barahona">Barahona</option>
+                            <option value="Dajabón">Dajabón</option>
+                            <option value="Distrito Nacional">Distrito Nacional</option>
+                            <option value="Duarte">Duarte</option>
+                            <option value="Elías Piña">Elías Piña</option>
+                            <option value="El Seibo">El Seibo</option>
+                            <option value="Espaillat">Espaillat</option>
+                            <option value="Hato Mayor">Hato Mayor</option>
+                            <option value="Hermanas Mirabal">Hermanas Mirabal</option>
+                            <option value="Independencia">Independencia</option>
+                            <option value="La Altagracia">La Altagracia</option>
                             <option value="La Romana">La Romana</option>
-                            <option value="Puerto Plata">Puerto Plata</option>
                             <option value="La Vega">La Vega</option>
+                            <option value="María Trinidad Sánchez">María Trinidad Sánchez</option>
+                            <option value="Monseñor Nouel">Monseñor Nouel</option>
+                            <option value="Monte Cristi">Monte Cristi</option>
+                            <option value="Monte Plata">Monte Plata</option>
+                            <option value="Pedernales">Pedernales</option>
+                            <option value="Peravia">Peravia</option>
+                            <option value="Puerto Plata">Puerto Plata</option>
+                            <option value="Samaná">Samaná</option>
                             <option value="San Cristóbal">San Cristóbal</option>
-                            <option value="Bávaro">Bávaro</option>
+                            <option value="San José de Ocoa">San José de Ocoa</option>
+                            <option value="San Juan">San Juan</option>
+                            <option value="San Pedro de Macorís">San Pedro de Macorís</option>
+                            <option value="Sánchez Ramírez">Sánchez Ramírez</option>
+                            <option value="Santiago">Santiago</option>
+                            <option value="Santiago Rodríguez">Santiago Rodríguez</option>
+                            <option value="Santo Domingo">Santo Domingo</option>
+                            <option value="Valverde">Valverde</option>
                         </select>
                     </div>
 

@@ -468,15 +468,17 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                         <option value="">Seleccionar...</option>
                                         <?php
                                         $cities = [
-                                            'Azua', 'Bahoruco', 'Barahona', 'Bávaro', 'Dajabón',
-                                            'Distrito Nacional', 'Duarte', 'Elías Piña', 'El Seibo',
-                                            'Espaillat', 'Hato Mayor', 'Hermanas Mirabal', 'Higüey', 'Independencia',
-                                            'La Altagracia', 'La Romana', 'La Vega', 'María Trinidad Sánchez',
-                                            'Monseñor Nouel', 'Monte Cristi', 'Monte Plata', 'Pedernales',
-                                            'Peravia', 'Puerto Plata', 'Punta Cana', 'Samaná', 'San Cristóbal',
-                                            'San José de Ocoa', 'San Juan', 'San Pedro de Macorís',
-                                            'Sánchez Ramírez', 'Santiago', 'Santiago Rodríguez',
-                                            'Santo Domingo', 'Valverde'
+                                            'Azua', 'Bahoruco', 'Baní', 'Barahona', 'Bávaro', 'Bayahibe', 'Boca Chica', 'Cabarete', 
+                                            'Casa de Campo', 'Constanza', 'Cotuí', 'Dajabón', 'Distrito Nacional', 'Duarte', 
+                                            'Elías Piña', 'El Seibo', 'Espaillat', 'Gaspar Hernández', 'Hato Mayor', 
+                                            'Hermanas Mirabal', 'Higüey', 'Independencia', 'Jarabacoa', 'Juan Dolio', 
+                                            'La Altagracia', 'La Romana', 'Las Galeras', 'Las Terrenas', 'La Vega', 
+                                            'Mao', 'María Trinidad Sánchez', 'Moca', 'Monseñor Nouel', 'Monte Cristi', 
+                                            'Monte Plata', 'Nagua', 'Pedernales', 'Peravia', 'Puerto Plata', 'Punta Cana', 
+                                            'Río San Juan', 'Samaná', 'San Cristóbal', 'San Francisco de Macorís', 
+                                            'San José de Ocoa', 'San Juan', 'San Pedro de Macorís', 'Sánchez Ramírez', 
+                                            'Santiago', 'Santiago Rodríguez', 'Santo Domingo Provincia', 'Santo Domingo Este', 
+                                            'Santo Domingo Norte', 'Santo Domingo Oeste', 'Sosúa', 'Valverde'
                                         ];
                                         foreach ($cities as $city) {
                                             $selected = ($property['ciudad'] ?? '') === $city ? 'selected' : '';

@@ -327,10 +327,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             // Actualizar contenido para la propiedad específica
             shareModalEl.querySelector('.modal-body p').textContent = title;
-            shareModalEl.querySelector('#shareUrlInput').value = url;
-            shareModalEl.querySelector('a[href^="https://wa.me/"]').href = `https://wa.me/?text=${encodeURIComponent('Mira esta propiedad: ' + title + ' ' + url)}`;
-            shareModalEl.querySelector('a[href^="https://www.facebook.com/"]').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-            shareModalEl.querySelector('a[href^="https://twitter.com/"]').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent('Mira esta propiedad: ' + title)}&url=${encodeURIComponent(url)}`;
+            shareModalEl.querySelector('#shareUrlInput').value = absoluteUrl;
+            shareModalEl.querySelector('a[href^="https://wa.me/"]').href = `https://wa.me/?text=${encodeURIComponent('Mira esta propiedad: ' + title + ' ' + absoluteUrl)}`;
+            shareModalEl.querySelector('a[href^="https://www.facebook.com/"]').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(absoluteUrl)}`;
+            shareModalEl.querySelector('a[href^="https://twitter.com/"]').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent('Mira esta propiedad: ' + title)}&url=${encodeURIComponent(absoluteUrl)}`;
         }
 
         const modal = new bootstrap.Modal(shareModalEl);
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const copyFn = () => {
             const copyInput = shareModalEl.querySelector('#shareUrlInput');
             copyInput.select();
-            navigator.clipboard.writeText(url).then(() => {
+            navigator.clipboard.writeText(absoluteUrl).then(() => {
                 showToast('¡Enlace copiado al portapapeles!', 'success');
                 modal.hide();
             });

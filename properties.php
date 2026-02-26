@@ -355,7 +355,7 @@ include_once __DIR__ . '/includes/header.php';
                                                 <button class="btn btn-sm btn-outline-gold share-btn" 
                                                     data-id="<?php echo $property['id']; ?>"
                                                     data-title="<?php echo escape_output($property['title']); ?>"
-                                                    data-url="<?php echo SITE_URL; ?>/property-detail.php?id=<?php echo $property['id']; ?>"
+                                                    data-url="property-detail.php?id=<?php echo $property['id']; ?>"
                                                     title="Compartir">
                                                     <i class="fas fa-share-alt"></i>
                                                 </button>

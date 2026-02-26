@@ -221,22 +221,134 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ============================================
-    // COPY TO CLIPBOARD
+    // PROPERTY SHARING LOGIC
     // ============================================
-    const copyButtons = document.querySelectorAll('[data-copy]');
-    copyButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const text = this.dataset.copy;
-            navigator.clipboard.writeText(text).then(() => {
-                // Mostrar feedback visual
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-check me-2"></i>Copiado!';
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                }, 2000);
+    document.addEventListener('click', function (e) {
+        const shareBtn = e.target.closest('.share-btn');
+        if (!shareBtn) return;
+
+        e.preventDefault();
+        const id = shareBtn.dataset.id;
+        const title = shareBtn.dataset.title;
+        const url = shareBtn.dataset.url;
+        const absoluteUrl = new URL(url, window.location.origin).href;
+
+        // Detectar si es móvil para decidir si usar navigator.share
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (navigator.share && isMobile) {
+            // Usar API nativa solo en móviles
+            navigator.share({
+                title: title,
+                text: `Mira esta propiedad: ${title}`,
+                url: absoluteUrl,
+            }).catch((error) => {
+                console.log('Error sharing with native API', error);
+                showShareModal(title, absoluteUrl);
             });
-        });
+        } else {
+            // Fallback para Desktop o si falla navigator.share
+            showShareModal(title, absoluteUrl);
+        }
     });
+
+    function showShareModal(title, url) {
+        // Crear el modal de compartir si no existe
+        let shareModalEl = document.getElementById('shareModal');
+        if (!shareModalEl) {
+            shareModalEl = document.createElement('div');
+            shareModalEl.id = 'shareModal';
+            shareModalEl.className = 'modal fade';
+            shareModalEl.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Compartir Propiedad</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="text-muted mb-4 small">${title}</p>
+                            <div class="d-flex justify-content-around mb-4">
+                                <a href="https://wa.me/?text=${encodeURIComponent('Mira esta propiedad: ' + title + ' ' + url)}" target="_blank" class="share-option text-center text-decoration-none">
+                                    <div class="share-icon bg-success-subtle text-success mb-2">
+                                        <i class="fab fa-whatsapp fa-2x"></i>
+                                    </div>
+                                    <span class="small text-dark">WhatsApp</span>
+                                </a>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="share-option text-center text-decoration-none">
+                                    <div class="share-icon bg-primary-subtle text-primary mb-2">
+                                        <i class="fab fa-facebook-f fa-2x"></i>
+                                    </div>
+                                    <span class="small text-dark">Facebook</span>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent('Mira esta propiedad: ' + title)}&url=${encodeURIComponent(url)}" target="_blank" class="share-option text-center text-decoration-none">
+                                    <div class="share-icon bg-info-subtle text-info mb-2">
+                                        <i class="fab fa-twitter fa-2x"></i>
+                                    </div>
+                                    <span class="small text-dark">Twitter</span>
+                                </a>
+                                <div class="share-option text-center cursor-pointer" id="copyShareLink">
+                                    <div class="share-icon bg-secondary-subtle text-secondary mb-2">
+                                        <i class="fas fa-link fa-2x"></i>
+                                    </div>
+                                    <span class="small text-dark">Copiar</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="${url}" readonly id="shareUrlInput">
+                                <button class="btn btn-outline-gold" type="button" id="copyShareBtn">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(shareModalEl);
+
+            // Estilos dinámicos para el modal de compartir
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .share-icon {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto;
+                    transition: transform 0.2s;
+                }
+                .share-option:hover .share-icon {
+                    transform: scale(1.1);
+                }
+                .cursor-pointer { cursor: pointer; }
+            `;
+            document.head.appendChild(style);
+        } else {
+            // Actualizar contenido para la propiedad específica
+            shareModalEl.querySelector('.modal-body p').textContent = title;
+            shareModalEl.querySelector('#shareUrlInput').value = url;
+            shareModalEl.querySelector('a[href^="https://wa.me/"]').href = `https://wa.me/?text=${encodeURIComponent('Mira esta propiedad: ' + title + ' ' + url)}`;
+            shareModalEl.querySelector('a[href^="https://www.facebook.com/"]').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            shareModalEl.querySelector('a[href^="https://twitter.com/"]').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent('Mira esta propiedad: ' + title)}&url=${encodeURIComponent(url)}`;
+        }
+
+        const modal = new bootstrap.Modal(shareModalEl);
+        
+        // Agregar eventos de copia
+        const copyFn = () => {
+            const copyInput = shareModalEl.querySelector('#shareUrlInput');
+            copyInput.select();
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('¡Enlace copiado al portapapeles!', 'success');
+                modal.hide();
+            });
+        };
+
+        shareModalEl.querySelector('#copyShareLink').onclick = copyFn;
+        shareModalEl.querySelector('#copyShareBtn').onclick = copyFn;
+
+        modal.show();
+    }
 
 });
 

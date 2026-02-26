@@ -227,17 +227,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const shareBtn = e.target.closest('.share-btn');
         if (!shareBtn) return;
 
+        console.log('Share button clicked');
         e.preventDefault();
         const id = shareBtn.dataset.id;
         const title = shareBtn.dataset.title;
         const url = shareBtn.dataset.url;
+        console.log('Share data:', { id, title, url });
+        
         const absoluteUrl = new URL(url, window.location.origin).href;
+        console.log('Absolute URL:', absoluteUrl);
 
         // Detectar si es móvil para decidir si usar navigator.share
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        console.log('Is mobile:', isMobile);
+        console.log('Navigator share exists:', !!navigator.share);
 
         if (navigator.share && isMobile) {
-            // Usar API nativa solo en móviles
+            console.log('Attempting native share');
             navigator.share({
                 title: title,
                 text: `Mira esta propiedad: ${title}`,
@@ -247,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showShareModal(title, absoluteUrl);
             });
         } else {
+            console.log('Opening fallback modal');
             // Fallback para Desktop o si falla navigator.share
             showShareModal(title, absoluteUrl);
         }

@@ -11,7 +11,18 @@ require_auth();
 $page_title = 'Analíticas';
 
 // 1. Obtener Periodo (Últimos 30 días por defecto)
-$days_to_show = isset($_GET['period']) && $_GET['period'] === 'week' ? 7 : 30;
+$period = $_GET['period'] ?? 'month';
+switch ($period) {
+    case 'week': $days_to_show = 7; break;
+    case '3months': $days_to_show = 90; break;
+    case '6months': $days_to_show = 180; break;
+    case 'year': $days_to_show = 365; break;
+    case 'month':
+    default:
+        $days_to_show = 30;
+        $period = 'month';
+        break;
+}
 $start_date = date('Y-m-d', strtotime("-$days_to_show days")) . 'T00:00:00Z';
 
 // 2. Obtener Datos de Analítica desde Supabase
@@ -23,11 +34,21 @@ $analytics_data = supabase_get('property_analytics', [
 if ($analytics_data === false) $analytics_data = [];
 
 // 3. Obtener Propiedades para mapear nombres
-$properties = supabase_get('properties', [], 'id,title,views');
+$properties = supabase_get('properties', [], 'id,title');
 if ($properties === false) $properties = [];
 $prop_map = [];
 foreach ($properties as $p) {
     $prop_map[$p['id']] = $p['title'];
+}
+
+// Obtener TODAS las analíticas para calcular Vistas Totales Hitóricas
+$all_analytics = supabase_get('property_analytics', ['select' => 'property_id']);
+if ($all_analytics === false) $all_analytics = [];
+$total_views_map = [];
+foreach ($all_analytics as $row) {
+    $pid = $row['property_id'];
+    if (!isset($total_views_map[$pid])) $total_views_map[$pid] = 0;
+    $total_views_map[$pid]++;
 }
 
 // 4. Procesar Datos para Gráficos
@@ -115,9 +136,14 @@ $top_property_name = $top_property_id ? ($prop_map[$top_property_id] ?? 'Descono
         <main class="main-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold">Analíticas de Propiedades</h2>
-                <div class="btn-group">
-                    <a href="?period=week" class="btn <?php echo $days_to_show === 7 ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">Esta Semana</a>
-                    <a href="?period=month" class="btn <?php echo $days_to_show === 30 ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">Este Mes</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="btn-group">
+                        <a href="?period=week" class="btn <?php echo $period === 'week' ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">Semana</a>
+                        <a href="?period=month" class="btn <?php echo $period === 'month' ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">Mes</a>
+                        <a href="?period=3months" class="btn <?php echo $period === '3months' ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">3 Meses</a>
+                        <a href="?period=6months" class="btn <?php echo $period === '6months' ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">6 Meses</a>
+                        <a href="?period=year" class="btn <?php echo $period === 'year' ? 'btn-gold' : 'btn-outline-dark'; ?> shadow-sm">1 Año</a>
+                    </div>
                 </div>
             </div>
 
@@ -176,9 +202,8 @@ $top_property_name = $top_property_id ? ($prop_map[$top_property_id] ?? 'Descono
                                                 <td class="ps-4 fw-bold"><?php echo $prop_map[$pid] ?? 'Propiedad eliminada'; ?></td>
                                                 <td class="text-center"><span class="badge bg-primary rounded-pill"><?php echo $views; ?></span></td>
                                                 <td class="text-center text-muted"><?php 
-                                                    // Buscar vista total en el array original masivo de propiedades
-                                                    $total_ever = 0;
-                                                    foreach($properties as $ptot) { if($ptot['id'] == $pid) { $total_ever = $ptot['views']; break; } }
+                                                    // Usar el mapa de vistas totales calculado
+                                                    $total_ever = $total_views_map[$pid] ?? $views;
                                                     echo number_format($total_ever);
                                                 ?></td>
                                                 <td class="text-end pe-4">

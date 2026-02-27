@@ -341,13 +341,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Norvis connecting to:', apiUrl);
 
+            const currentLang = localStorage.getItem('selectedLanguage') || 'es';
+            
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ query: text })
+                body: JSON.stringify({ 
+                    query: text,
+                    lang: currentLang
+                })
             });
 
             if (!response.ok) {
@@ -371,10 +376,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const siteUrl = '<?php echo trim(SITE_URL, "/"); ?>';
                 const absoluteUrl = siteUrl + '/api/bot-search.php';
                 
+                const currentLang = localStorage.getItem('selectedLanguage') || 'es';
                 const response = await fetch(absoluteUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ query: text })
+                    body: JSON.stringify({ 
+                        query: text,
+                        lang: currentLang
+                    })
                 });
 
                 if (response.ok) {
@@ -472,6 +481,50 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessage(e.target.dataset.query);
         }
     });
+
+    // 4. ESCUCHAR CAMBIOS DE IDIOMA PARA TRADUCIR SALUDO INICIAL
+    const greetingsMap = {
+        'es': { 
+            bubble: '¡Hola! ¿En qué puedo ayudarte?', 
+            msg: '¡Hola! Me llamo Norvis 🤖. Estoy aquí para ayudarte a encontrar la casa de tus sueños. ¿Qué buscas hoy?',
+            placeholder: 'Escribe aquí...',
+            suggestions: ['Quiero una vivienda', 'Representante', 'Redes Sociales']
+        },
+        'en': { 
+            bubble: 'Hi! How can I help you?', 
+            msg: 'Hello! My name is Norvis 🤖. I am here to help you find the home of your dreams. What are you looking for today?',
+            placeholder: 'Type here...',
+            suggestions: ['I want a home', 'Representative', 'Social Media']
+        },
+        'fr': { 
+            bubble: 'Salut! Comment puis-je vous aider?', 
+            msg: 'Bonjour! Je m\'appelle Norvis 🤖. Je suis ici para vous aider à trouver la maison de vos rêves. Que cherchez-vous aujourd\'hui?',
+            placeholder: 'Écrivez ici...',
+            suggestions: ['Je veux une maison', 'Représentant', 'Médias Sociaux']
+        }
+        // ... se pueden añadir más si se desea, o dejar que la IA maneje el resto
+    };
+
+    function updateBotLanguage(langCode) {
+        const lang = langCode.split('-')[0];
+        const config = greetingsMap[lang] || greetingsMap['en']; // Default to English if not in map
+        
+        if (botBubble) botBubble.textContent = config.bubble;
+        if (chatInput) chatInput.placeholder = config.placeholder;
+        
+        // Solo cambiar el mensaje inicial si el chat está vacío o recién abierto
+        if (chatMessages.children.length <= 1) {
+            chatMessages.innerHTML = `<div class="message bot-msg">${config.msg}</div>`;
+        }
+    }
+
+    window.addEventListener('languageChanged', (e) => {
+        updateBotLanguage(e.detail.lang);
+    });
+
+    // Carga inicial
+    const savedLang = localStorage.getItem('selectedLanguage');
+    if (savedLang) updateBotLanguage(savedLang);
 
     document.addEventListener('click', (e) => {
         if (!botContainer.contains(e.target) && chatWindow.classList.contains('open')) {

@@ -284,7 +284,7 @@ a:hover {
 }
 
 .navbar-logo-text {
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--color-gold);
@@ -318,9 +318,11 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg,
-            var(--color-black) 0%,
-            var(--color-gray-dark) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--color-black) 0%,
+        var(--color-gray-dark) 100%
+    );
     overflow: hidden;
 }
 
@@ -329,7 +331,7 @@ a:hover {
     min-height: 650px;
     background-image:
         linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)),
-        url('../images/portada.png');
+        url("../images/portada.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -459,7 +461,11 @@ a:hover {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--color-gold) 0%,
+        var(--color-gold-light) 100%
+    );
     border: none;
     box-shadow: 0 4px 15px rgba(212, 167, 69, 0.4);
 }
@@ -467,7 +473,11 @@ a:hover {
 .search-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 25px rgba(212, 167, 69, 0.5);
-    background: linear-gradient(135deg, var(--color-gold-light) 0%, var(--color-gold) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--color-gold-light) 0%,
+        var(--color-gold) 100%
+    );
 }
 
 /* ============================================
@@ -492,9 +502,11 @@ a:hover {
     display: block;
     width: 80px;
     height: 4px;
-    background: linear-gradient(90deg,
-            var(--color-gold) 0%,
-            var(--color-gold-light) 100%);
+    background: linear-gradient(
+        90deg,
+        var(--color-gold) 0%,
+        var(--color-gold-light) 100%
+    );
     margin: var(--spacing-sm) auto 0;
     border-radius: var(--radius-sm);
 }
@@ -898,4 +910,181 @@ a:hover {
     100% {
         transform: rotate(360deg);
     }
+}
+
+/* ============================================
+   TRANSLATOR WIDGET (PREMIUM GLASSMORPHISM)
+   ============================================ */
+.language-selector-wrapper {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 1000;
+}
+
+.language-btn {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-black) 0%, #2a2a2a 100%);
+    color: var(--color-gold);
+    border: 2px solid var(--color-gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(5px);
+}
+
+.language-btn i {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 0 5px rgba(212, 167, 69, 0.3));
+}
+
+.language-btn .lang-text {
+    font-size: 0.75rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+}
+
+.language-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--color-gold);
+    color: var(--color-black);
+    border-color: var(--color-black);
+}
+
+.language-dropdown {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+    width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.language-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.language-dropdown-header {
+    background: var(--color-black);
+    color: var(--color-gold);
+    padding: 12px 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    border-bottom: 1px solid var(--color-gold);
+}
+
+.language-options-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.language-options-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.language-options-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-gold);
+    border-radius: 10px;
+}
+
+.language-option {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-black);
+}
+
+.language-option img {
+    width: 22px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.language-option:hover {
+    background: rgba(212, 167, 69, 0.15);
+    color: var(--color-gold-dark);
+    padding-left: 25px;
+}
+
+/* Loader */
+.language-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.language-loader.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lang-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #eee;
+    border-top: 3px solid var(--color-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Ocultar barra de Google Translate */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget-icon,
+.goog-logo-link {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+.goog-te-balloon-frame {
+    display: none !important;
+}
+
+/* Prevenir que el widget de translate moleste */
+#goog-gt-tt {
+    display: none !important;
+}
+.goog-te-spinner-pos {
+    display: none !important;
 }

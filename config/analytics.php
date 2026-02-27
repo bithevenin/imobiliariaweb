@@ -7,13 +7,11 @@
 require_once __DIR__ . '/supabase.php';
 
 /**
- * Registra una vista para una propiedad específica si es un visitante nuevo o único del día
- * @param string $property_id UUID de la propiedad
+ * Registra una vista (sea de una propiedad o general del sitio)
+ * @param string|null $property_id UUID de la propiedad o null para visita general
  * @return bool
  */
-function track_property_view($property_id) {
-    if (!$property_id) return false;
-
+function track_property_view($property_id = null) {
     // 1. Identificar al visitante (Cookie persistente + Hash temporal)
     $visitor_cookie_name = 'ibron_vid';
     if (!isset($_COOKIE[$visitor_cookie_name])) {
@@ -29,31 +27,36 @@ function track_property_view($property_id) {
     $day_salt = date('Y-m-d'); 
     $fingerprint = hash('sha256', $visitor_id . $ip . $ua . $day_salt);
 
-    // 3. Verificar si ya se contó esta vista hoy en la SESIÓN para evitar hits rápidos
-    $session_key = "viewed_prop_" . $property_id;
+    // 3. Verificar si ya se contó esta vista hoy en la SESIÓN
+    $session_key = "viewed_prop_" . ($property_id ?? 'site');
     if (session_status() === PHP_SESSION_NONE) session_start();
     
     if (isset($_SESSION[$session_key])) {
-        return false; // Ya visto en esta sesión
+        return false;
     }
 
-    // 4. Consultar Supabase para ver si este fingerprint ya registró vista hoy para ESTA propiedad
-    // Nota: Esto es opcional si confiamos en la sesión, pero lo hace más "real" entre dispositivos con misma IP
+    // 4. Consultar Supabase
     $today_start = date('Y-m-d') . 'T00:00:00Z';
-    $existing = supabase_get('property_analytics', [
-        'property_id' => 'eq.' . $property_id,
+    $filters = [
         'viewer_id' => 'eq.' . $fingerprint,
         'created_at' => 'gte.' . $today_start
-    ]);
+    ];
+    if ($property_id) {
+        $filters['property_id'] = 'eq.' . $property_id;
+    } else {
+        $filters['property_id'] = 'is.null';
+    }
+    
+    $existing = supabase_get('property_analytics', $filters);
 
     if (!empty($existing)) {
         $_SESSION[$session_key] = true;
-        return false; // Ya registrado en DB hoy
+        return false;
     }
 
-    // 5. Registrar la vista en la tabla de analíticas
+    // 5. Registrar la vista
     $data = [
-        'property_id' => $property_id,
+        'property_id' => $property_id, // NULL si es visita general
         'viewer_id' => $fingerprint,
         'created_at' => date('c')
     ];
@@ -61,15 +64,15 @@ function track_property_view($property_id) {
     $result = supabase_insert('property_analytics', $data);
 
     if ($result) {
-        // Marca en sesión para no re-consultar en este request/sesión
         $_SESSION[$session_key] = true;
 
-        // 6. Actualizar el contador acumulado en la tabla properties (para velocidad de UI)
-        // Primero obtenemos el valor actual
-        $prop_data = supabase_get('properties', ['id' => 'eq.' . $property_id], 'views');
-        if (!empty($prop_data)) {
-            $current_views = (int)($prop_data[0]['views'] ?? 0);
-            supabase_update('properties', $property_id, ['views' => $current_views + 1]);
+        // 6. Actualizar contador acumulado (solo si hay propiedad)
+        if ($property_id) {
+            $prop_data = supabase_get('properties', ['id' => 'eq.' . $property_id], 'views');
+            if (!empty($prop_data)) {
+                $current_views = (int)($prop_data[0]['views'] ?? 0);
+                supabase_update('properties', $property_id, ['views' => $current_views + 1]);
+            }
         }
         return true;
     }

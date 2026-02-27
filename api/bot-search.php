@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Recibir la consulta del bot
 $input = json_decode(file_get_contents('php://input'), true);
 $query = isset($input['query']) ? sanitize_input($input['query']) : '';
+$lang = isset($input['lang']) ? sanitize_input($input['lang']) : 'es';
 
 if (empty($query)) {
     echo json_encode([
@@ -63,7 +63,15 @@ $raw_properties = supabase_get('properties', ['status' => 'eq.Disponible', 'limi
 $prop_context = "";
 if ($raw_properties) {
     foreach ($raw_properties as $p) {
-        $price = format_price($p['price'], 'DOP');
+        $currency = 'DOP';
+        if (!empty($p['features'])) {
+            $features_arr = is_array($p['features']) ? $p['features'] : pg_array_to_php_array($p['features']);
+            $features_arr = array_map('trim', $features_arr);
+            if (in_array('USD', $features_arr)) {
+                $currency = 'USD';
+            }
+        }
+        $price = format_price($p['price'], $currency);
         $prop_context .= "- ID: {$p['id']}, Título: {$p['title']}, Tipo: {$p['type']}, Ciudad: {$p['ciudad']}, Sector: {$p['sector']}, Precio: {$price}\n";
     }
 }
@@ -84,27 +92,33 @@ Redes Sociales:
 Misión: Proporcionar servicios inmobiliarios de excelencia mediante un servicio personalizado y transparente.
 ";
 
+$lang_names = [
+    'es' => 'Español',
+    'en' => 'Inglés',
+    'fr' => 'Francés',
+    'pt' => 'Portugués',
+    'it' => 'Italiano',
+    'de' => 'Alemán',
+    'ru' => 'Ruso',
+    'zh' => 'Chino',
+    'ja' => 'Japonés',
+    'ar' => 'Árabe',
+    'hi' => 'Hindi',
+    'nl' => 'Holandés',
+    'tr' => 'Turco'
+];
+$target_lang_name = $lang_names[substr($lang, 0, 2)] ?? 'Español';
+
 $system_prompt = "
 Eres 'Norvis', el asistente virtual e inteligente de Ibron Inmobiliaria, y sobre todo, eres un NEGOCIANTE POR EXCELENCIA. 
 Tu objetivo no es solo informar, sino CERRAR ventas y captar clientes altamente interesados.
 
+IMPORTANTE: DEBES RESPONDER SIEMPRE EN EL IDIOMA: {$target_lang_name}.
+
 PERSONALIDAD:
 - Profesional, persuasivo, amable y con gran visión comercial.
 - Si detectas que el cliente tiene intención de comprar, invertir, o pregunta por precios y visitas, actúa como un cerrador de ventas experto.
-
-CONOCIMIENTO DE LA AGENCIA:
-{$agency_context}
-
-PROPIEDADES DISPONIBLES:
-{$prop_context}
-
-INSTRUCCIONES DE NAVEGACIÓN Y CIERRE (CRÍTICAS):
-1. SALUDOS: Si el usuario te saluda (ej: 'hola', 'buenos días'), DEBES responder EXACTAMENTE: '¡Hola! Me llamo Norvis, ¿cómo estás? ¿En qué te puedo ayudar hoy?'. Sé breve y cordial.
-2. REDES SOCIALES: Proporciona tus enlaces de Instagram, Facebook o YouTube ÚNICAMENTE si el usuario te los pide explícitamente. No los menciones si no es necesario.
-3. WHATSAPP: DEBES incluir [TRIGGER_WHATSAPP] al final ÚNICAMENTE si el cliente dice que quiere COMPRAR o hablar con un REPRESENTANTE humano.
-4. NAVEGACIÓN INTERNA: Si el usuario pide específicamente ver FOTOS o DETALLES de una propiedad (ej: 'llévame a ver las fotos'), confirma la acción e incluye [NAVIGATE:ID] al final.
-5. NO abras WhatsApp ni navegues si solo preguntan precios o información general.
-6. Sé un cerrador persuasivo, amable y preciso.
+...
 ";
 
 // --- 3. LLAMADA A GROQ API ---
@@ -206,6 +220,15 @@ if ($raw_properties) {
     foreach ($raw_properties as $p) {
         if (strpos($ai_text, (string)$p['id']) !== false || strpos(mb_strtolower($ai_text), mb_strtolower($p['title'])) !== false) {
             
+            $currency = 'DOP';
+            if (!empty($p['features'])) {
+                $features_arr = is_array($p['features']) ? $p['features'] : pg_array_to_php_array($p['features']);
+                $features_arr = array_map('trim', $features_arr);
+                if (in_array('USD', $features_arr)) {
+                    $currency = 'USD';
+                }
+            }
+
             $img = $p['image_main'] ?? 'assets/img/placeholder.jpg';
             if (strpos($img, 'http') === false) {
                 $img = SITE_URL . '/' . ltrim($img, '/');
@@ -218,7 +241,7 @@ if ($raw_properties) {
                 'bedrooms' => $p['bedrooms'] ?? 0,
                 'bathrooms' => $p['bathrooms'] ?? 0,
                 'area' => $p['area'] ?? 0,
-                'price' => format_price($p['price'], (isset($p['currency']) && $p['currency'] === 'USD') ? 'USD' : 'DOP'),
+                'price' => format_price($p['price'], $currency),
                 'sector' => $p['sector'] ?? '',
                 'ciudad' => $p['ciudad'] ?? '',
                 'location' => ($p['sector'] ?? '') . ' ' . ($p['ciudad'] ?? ''),

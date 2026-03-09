@@ -219,6 +219,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const file = e.target.files[0];
         if (!file) return;
 
+        // ValidaciÃ³n de tipos permitidos
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+
+        if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(extension)) {
+            alert('Error: Solo se permiten imÃ¡genes en formato JPG, PNG o WEBP.');
+            e.target.value = ''; // Limpiar el input
+            return;
+        }
+
         currentCropTarget = target;
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -432,7 +443,10 @@ function formatFileSize(bytes) {
 
 function removeExistingImage(url, containerId) {
     if (confirm('Â¿EstÃ¡s seguro de que quieres eliminar esta imagen? Se borrarÃ¡ permanentemente.')) {
-        document.getElementById(containerId).style.display = 'none';
+        const el = document.getElementById(containerId);
+        if (el) {
+            el.remove(); // Eliminar completamente del DOM
+        }
         const container = document.getElementById('deleted-images-container');
         if (container) {
             const input = document.createElement('input');

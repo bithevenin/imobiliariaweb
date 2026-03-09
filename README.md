@@ -4,6 +4,10 @@
 
 ## correo
 
+🏠 Sitio Web Principal http://localhost/imobiliariaweb/
+
+🔐 Panel de Administración http://localhost/imobiliariaweb/admin/login.php
+
 correo: [ibroninmoviliaria@outlook.com] contraseña: [q34hu79k.] contraseña
 supabase: [Q34hu79k.10]
 

@@ -530,7 +530,7 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold">Imagen Principal</label>
                                     <input type="file" class="form-control form-control-sm" name="image_main"
-                                        id="image_main" accept="image/*">
+                                        id="image_main" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
                                     <div id="main-preview" class="preview-container">
                                         <?php if (!empty($property['image_main'])): ?>
                                             <div class="preview-item" id="main-c"><img
@@ -543,7 +543,7 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold">Galería</label>
                                     <input type="file" class="form-control form-control-sm" name="image_gallery[]"
-                                        id="image_gallery" accept="image/*" multiple>
+                                        id="image_gallery" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple>
                                     <div id="gallery-preview" class="preview-container">
                                         <?php if (!empty($property['image_gallery'])):
                                             $gal = is_array($property['image_gallery']) ? $property['image_gallery'] : pg_array_to_php_array($property['image_gallery']);
@@ -636,16 +636,6 @@ $unread_count = $all_messages ? count(array_filter($all_messages, fn($m) => ($m[
             sectorField.addEventListener('input', updateLocation);
         }
 
-        // Logic for previews
-        function removeExistingImage(url, id) {
-            if (confirm('Eliminar esta imagen?')) {
-                document.getElementById(id).style.display = 'none';
-                const cont = document.getElementById('deleted-images-container');
-                const inp = document.createElement('input');
-                inp.type = 'hidden'; inp.name = 'removed_images[]'; inp.value = url;
-                cont.appendChild(inp);
-            }
-        }
     </script>
 </body>
 

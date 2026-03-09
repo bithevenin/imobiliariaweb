@@ -1,0 +1,25 @@
+--- Escenario 1: Pregunta por Precio ---
+Norvis: Lo siento, pero no tengo informaci?n sobre un apartamento en Santiago en nuestro cat?logo actual. Nuestras propiedades disponibles son villas en Jarabacoa, La Vega. 
+
+- Tenemos una villa en Jarabacoa con un precio de RD$ 387,000.
+- Otra villa en Jarabacoa con un precio de RD$ 270,000.
+- Y una tercera villa en Jarabacoa con un precio de RD$ 375,000.
+
+Si est?s interesado en alguna de estas opciones o necesitas m?s informaci?n, estar? encantado de ayudarte. ?Te gustar?a saber m?s sobre alguna de estas villas?
+Trigger: NO (?XITO)
+
+--- Escenario 2: Quiero hablar con alguien ---
+Norvis: ?Claro! Me alegra que est?s interesado en hablar con un representante de Ibron Inmobiliaria. Nuestros expertos en bienes ra?ces est?n aqu? para ayudarte a encontrar la propiedad perfecta o para asesorarte en cualquier consulta que tengas.
+
+Puedes comunicarte con nosotros a trav?s de nuestro n?mero de tel?fono (829) 352-6103 o por correo electr?nico en ibroninmobiliaria@gmail.com. Tambi?n puedes enviarnos un mensaje a trav?s de WhatsApp en el n?mero 18293526103.
+
+Estoy seguro de que nuestros representantes estar?n encantados de atenderte y responder a cualquier pregunta que tengas.
+Trigger: S? (?XITO)
+
+--- Escenario 3: Quiero comprar ---
+Norvis: ?Excelente elecci?n! La propiedad que has seleccionado es una villa en Jarabacoa, La Vega, que ofrece una combinaci?n perfecta de naturaleza y comodidad. Nuestra villa en venta es una oportunidad ?nica para invertir en un lugar tranquilo y pintoresco, rodeado de monta?as y r?os.
+
+Me alegra que est?s interesado en comprar esta propiedad. Nuestro equipo de expertos en bienes ra?ces est? aqu? para ayudarte en todo el proceso de compra. Podemos proporcionarte m?s informaci?n sobre la propiedad, incluyendo detalles sobre la ubicaci?n, el tama?o, las caracter?sticas y el precio.
+
+Si est?s listo para dar el pr?ximo paso, puedo conectarte con uno de nuestros representantes para que puedas obtener m?s informaci?n y responder a cualquier pregunta que tengas. ?Te gustar?a hablar con un representante ahora?
+Trigger: S? (?XITO)

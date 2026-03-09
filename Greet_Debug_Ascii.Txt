@@ -1,0 +1,2 @@
+--- DEBUG HOLA ---
+RAW: {"success":true,"type":"text","message":"\u00a1Hola! Me llamo Norvis, \u00bfc\u00f3mo est\u00e1s? \u00bfEn qu\u00e9 te puedo ayudar hoy? Estoy aqu\u00ed para ayudarte con cualquier consulta o necesidad que tengas sobre bienes ra\u00edces en Rep\u00fablica Dominicana. \u00bfEst\u00e1s buscando comprar, vender o invertir en una propiedad? Estoy a tu disposici\u00f3n para ofrecerte mi asesoramiento y experiencia. \u00bfQu\u00e9 te trae aqu\u00ed hoy?","properties":[],"suggestions":["Hablar con representante","Ver m\u00e1s opciones"]}
